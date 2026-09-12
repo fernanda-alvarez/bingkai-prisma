@@ -91,11 +91,22 @@ function copyFonts() {
   }
 }
 
+function copyFavicon() {
+  const source = path.join(SRC, "favicon.svg");
+  if (!fs.existsSync(source)) return;
+  for (const dest of [ROOT, DIST]) {
+    const target = path.join(dest, "favicon.svg");
+    fs.copyFileSync(source, target);
+    console.log(`synced favicon to ${path.relative(ROOT, target)}`);
+  }
+}
+
 function main() {
   fs.mkdirSync(DIST, { recursive: true });
   buildOffline();
   buildProjects();
   copyFonts();
+  copyFavicon();
   console.log("build done. Open dist/PRISMA_2020_Offline.html or dist/PRISMA_Projects.html");
 }
 

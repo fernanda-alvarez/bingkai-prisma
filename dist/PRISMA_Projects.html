@@ -8,6 +8,7 @@
 <meta name="creator" content="Fernanda Alvarez Pratama">
 <meta name="repository" content="https://github.com/fernanda-alvarez/bingkai-prisma">
 <link rel="author" href="https://github.com/fernanda-alvarez">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -110,6 +111,9 @@
   .footer__identity .icon{color:var(--ink-soft);font-size:15px}
   .footer__dot{color:var(--line-strong)}
 
+  .shell > .topbar,.shell > main > .masthead,.shell > main > .toolbar,.shell > main > .notice,.shell > main > .project-table-head,.shell > main > #grid,.shell > main > .workflow-note,.shell > .footer{animation:dashboard-enter .46s cubic-bezier(.16,1,.3,1) both}
+  .shell > main > .masthead{animation-delay:40ms}.shell > main > .toolbar{animation-delay:80ms}.shell > main > .notice,.shell > main > .project-table-head,.shell > main > #grid{animation-delay:120ms}.shell > main > .workflow-note{animation-delay:160ms}.shell > .footer{animation-delay:200ms}
+  @keyframes dashboard-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
   @keyframes row-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   @media (max-width:1100px){
     .shell{width:min(100% - 36px,720px)}

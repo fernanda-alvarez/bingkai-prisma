@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Bingkai Prisma</title>
+  <desc id="desc">Blue document mark with a yellow offset accent</desc>
+  <rect x="12" y="12" width="44" height="44" rx="11" fill="#f5cf4d"/>
+  <rect x="6" y="6" width="44" height="44" rx="11" fill="#1768b0"/>
+  <path d="M19 15h17l7 7v22H19z" fill="#fff"/>
+  <path d="M36 15v8h7" fill="#dbeefa"/>
+  <path d="M24 31h14M24 37h14M24 43h8" fill="none" stroke="#1768b0" stroke-linecap="round" stroke-width="3"/>
+</svg>

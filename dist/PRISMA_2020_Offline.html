@@ -9,6 +9,7 @@
   <meta name="creator" content="Fernanda Alvarez Pratama">
   <meta name="repository" content="https://github.com/fernanda-alvarez/bingkai-prisma">
   <link rel="author" href="https://github.com/fernanda-alvarez">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -379,6 +380,21 @@ dialog.prisma-dialog::backdrop{
     .workspace { gap: 14px; }
     .preview-panel { border-radius: var(--radius); overflow:hidden; }
     .panel-card { border-radius: var(--radius); }
+
+    .app-shell > .topbar,
+    .app-shell > .toolbar,
+    .app-shell > .workspace,
+    .app-shell > .footer {
+      animation: workbench-enter 0.46s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .app-shell > .toolbar { animation-delay: 50ms; }
+    .app-shell > .workspace { animation-delay: 100ms; }
+    .app-shell > .footer { animation-delay: 150ms; }
+
+    @keyframes workbench-enter {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     .masthead {
       display: flex;
