@@ -82,10 +82,20 @@ function buildProjects() {
   write(distProj, html);
 }
 
+function copyFonts() {
+  const srcFonts = path.join(SRC, "fonts");
+  if (!fs.existsSync(srcFonts)) return;
+  for (const dest of [path.join(ROOT, "fonts"), path.join(DIST, "fonts")]) {
+    fs.cpSync(srcFonts, dest, { recursive: true });
+    console.log(`synced fonts to ${path.relative(ROOT, dest)}`);
+  }
+}
+
 function main() {
   fs.mkdirSync(DIST, { recursive: true });
   buildOffline();
   buildProjects();
+  copyFonts();
   console.log("build done. Open dist/PRISMA_2020_Offline.html or dist/PRISMA_Projects.html");
 }
 
