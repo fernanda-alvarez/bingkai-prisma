@@ -1,5 +1,12 @@
 // src/js/modules/00-constants.js — split from app.js — do not edit header order
 "use strict";
+    const PROJECT_PROVENANCE = Object.freeze({
+      product: "Bingkai Prisma",
+      creator: "Fernanda Alvarez Pratama",
+      creatorUrl: "https://github.com/fernanda-alvarez",
+      repository: "https://github.com/fernanda-alvarez/bingkai-prisma",
+      homepage: "https://bingkai-prisma.vercel.app"
+    });
 
     const HEADER = ["data", "node", "box", "description", "boxtext", "tooltips", "url", "n"];
     const VIEWBOX_WIDTH = 2140;

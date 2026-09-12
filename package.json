@@ -4,6 +4,9 @@
   "type": "module",
   "version": "1.0.0",
   "description": "PRISMA 2020 offline workbench — modular source, single-file dist",
+  "author": "Fernanda Alvarez Pratama",
+  "homepage": "https://bingkai-prisma.vercel.app",
+  "repository": "https://github.com/fernanda-alvarez/bingkai-prisma",
   "scripts": {
     "build": "node tools/build_offline_html.js",
     "dev": "node tools/build_offline_html.js && echo 'Open src/template.html via file:// or run: npx serve src -l 5173' && echo 'For HMR, run: npx vite src --port 5173 (if vite installed)'",

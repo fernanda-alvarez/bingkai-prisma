@@ -69,18 +69,17 @@ function buildOffline() {
 }
 
 function buildProjects() {
-  const srcProj = path.join(ROOT, "PRISMA_Projects.html");
+  const srcProj = path.join(SRC, "projects.html");
+  const rootProj = path.join(ROOT, "PRISMA_Projects.html");
   const distProj = path.join(DIST, "PRISMA_Projects.html");
   if (!fs.existsSync(srcProj)) {
-    console.log("no PRISMA_Projects.html at root, skipping projects build");
+    console.log("no src/projects.html, skipping projects build");
     return;
   }
   const html = read(srcProj);
-  // Projects dashboard is already single-file; just copy to dist
+  // Keep the source dashboard in src/ authoritative and publish synced copies.
+  write(rootProj, html);
   write(distProj, html);
-  // also ensure src copy exists for future modularization
-  const srcCopy = path.join(SRC, "projects.html");
-  if (!fs.existsSync(srcCopy)) write(srcCopy, html);
 }
 
 function main() {

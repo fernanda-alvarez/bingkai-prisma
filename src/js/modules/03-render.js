@@ -628,6 +628,9 @@ const POSITIONS = {
       clone.setAttribute("width", String(layout.width));
       clone.setAttribute("height", String(dl.height));
       clone.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      const metadata = document.createElementNS("http://www.w3.org/2000/svg", "metadata");
+      metadata.textContent = JSON.stringify(PROJECT_PROVENANCE);
+      clone.insertBefore(metadata, clone.firstChild);
       const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
       style.textContent = SVG_STYLE;
       clone.insertBefore(style, clone.firstChild);

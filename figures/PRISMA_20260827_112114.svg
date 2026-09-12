@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1560" viewBox="0 0 1120 1560" role="img" aria-label="PRISMA 2020 flow diagram for new systematic reviews which included searches of databases, registers and other sources">
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#555555"/></marker></defs>
-<metadata><data-source>PRISMA_20260827_112114.csv</data-source><generated>2026-08-27 11:21:20</generated><schema>PRISMA 2020 35x8</schema></metadata>
+<metadata><product>Bingkai Prisma</product><creator>Fernanda Alvarez Pratama</creator><creator-url>https://github.com/fernanda-alvarez</creator-url><repository>https://github.com/fernanda-alvarez/bingkai-prisma</repository><homepage>https://bingkai-prisma.vercel.app</homepage><data-source>PRISMA_20260827_112114.csv</data-source><generated>2026-08-27 11:21:20</generated><schema>PRISMA 2020 35x8</schema></metadata>
 <text x="560.0" y="36" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#111111">PRISMA 2020 flow diagram for new systematic reviews which included searches of databases,</text>
 <text x="560.0" y="60" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#111111">registers and other sources</text>
 <rect x="20" y="70" width="1080" height="460" fill="#dcebfa" stroke="#999999" stroke-width="1"/>

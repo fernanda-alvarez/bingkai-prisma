@@ -5,8 +5,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="An offline PRISMA 2020 flow diagram editor and preview tool.">
-  <title>PRISMA 2020 Offline Workbench</title>
-  <!-- built 2026-09-12 13:56:43 from src/ -->
+  <meta name="author" content="Fernanda Alvarez Pratama">
+  <meta name="creator" content="Fernanda Alvarez Pratama">
+  <meta name="repository" content="https://github.com/fernanda-alvarez/bingkai-prisma">
+  <link rel="author" href="https://github.com/fernanda-alvarez">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Bingkai Prisma",
+    "applicationCategory": "DeveloperApplication",
+    "author": { "@type": "Person", "name": "Fernanda Alvarez Pratama", "url": "https://github.com/fernanda-alvarez" },
+    "url": "https://bingkai-prisma.vercel.app",
+    "codeRepository": "https://github.com/fernanda-alvarez/bingkai-prisma"
+  }
+  </script>
+  <title>Bingkai Prisma — PRISMA 2020 Workbench</title>
+  <!-- built 2026-09-12 14:26:40 from src/ -->
   <style>
 /* tokens.css — Pro design tokens (keeps your blue/grey/yellow palette, refined) */
 :root{
@@ -1084,7 +1099,7 @@ dialog.prisma-dialog::backdrop{
       <div class="topbar__brand">
         <div class="topbar__logo" aria-hidden="true">P</div>
         <div style="min-width:0">
-          <div class="topbar__title">PRISMA 2020 <span style="font-weight:500;color:var(--muted)">· Offline Workbench</span></div>
+          <div class="topbar__title">Bingkai Prisma <span style="font-weight:500;color:var(--muted)">· PRISMA 2020 Workbench</span></div>
           <div class="topbar__subtitle"><span class="eyebrow" style="margin:0;font-size:10px;">PRISMA 2020 flow diagram</span> — offline, no uploads, no tracking · <span id="topbarProjectSubtitle" class="helper" style="font-size:11px;">New review — clean template</span></div>
         </div>
       </div>
@@ -1333,7 +1348,7 @@ dialog.prisma-dialog::backdrop{
     </main>
 
     <footer class="footer">
-      Based on the PRISMA 2020 flow diagram structure. Reference: <a href="https://estech.shinyapps.io/prisma_flowdiagram/" target="_blank" rel="noreferrer">PRISMA Flow Diagram Shiny app</a>. · <span class="badge badge--muted">Pro Overhaul · Solo edition · v1.1</span>
+      Based on the PRISMA 2020 flow diagram structure. Reference: <a href="https://estech.shinyapps.io/prisma_flowdiagram/" target="_blank" rel="noreferrer">PRISMA Flow Diagram Shiny app</a>. · <span class="badge badge--muted">Pro Overhaul · Solo edition · v1.1</span> · <span>Created by <a href="https://github.com/fernanda-alvarez" target="_blank" rel="noreferrer">Fernanda Alvarez Pratama</a></span>
     </footer>
   </div>
 
@@ -1418,6 +1433,13 @@ dialog.prisma-dialog::backdrop{
   <script>
 // src/js/modules/00-constants.js — split from app.js — do not edit header order
 "use strict";
+    const PROJECT_PROVENANCE = Object.freeze({
+      product: "Bingkai Prisma",
+      creator: "Fernanda Alvarez Pratama",
+      creatorUrl: "https://github.com/fernanda-alvarez",
+      repository: "https://github.com/fernanda-alvarez/bingkai-prisma",
+      homepage: "https://bingkai-prisma.vercel.app"
+    });
 
     const HEADER = ["data", "node", "box", "description", "boxtext", "tooltips", "url", "n"];
     const VIEWBOX_WIDTH = 2140;
@@ -1879,6 +1901,7 @@ let EXPECTED_DATA_KEYS = null;
       const bundle = {
         kind: "prisma2020.project-bundle.v1",
         exportedAt: new Date().toISOString(),
+        provenance: PROJECT_PROVENANCE,
         project: JSON.parse(JSON.stringify(cur)),
         csv: rowsToCSV()
       };
@@ -3164,6 +3187,9 @@ const POSITIONS = {
       clone.setAttribute("width", String(layout.width));
       clone.setAttribute("height", String(dl.height));
       clone.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      const metadata = document.createElementNS("http://www.w3.org/2000/svg", "metadata");
+      metadata.textContent = JSON.stringify(PROJECT_PROVENANCE);
+      clone.insertBefore(metadata, clone.firstChild);
       const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
       style.textContent = SVG_STYLE;
       clone.insertBefore(style, clone.firstChild);
@@ -4185,6 +4211,7 @@ editorFields.addEventListener("input", (event) => {
         const bundle = {
           kind:"prisma2020.project-bundle.v1",
           exportedAt: new Date().toISOString(),
+          provenance: PROJECT_PROVENANCE,
           project: JSON.parse(JSON.stringify(cur)),
           csv: (typeof rowsToCSV==="function" ? rowsToCSV() : "")
         };

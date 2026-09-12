@@ -1,4 +1,6 @@
-# PRISMA 2020 — flow diagram workspace
+# Bingkai Prisma — PRISMA 2020 flow diagram workspace
+
+Created and maintained by **Fernanda Alvarez Pratama** · [live app](https://bingkai-prisma.vercel.app) · [source repository](https://github.com/fernanda-alvarez/bingkai-prisma)
 
 PRISMA 2020 flow-diagram data, validation, exports and figures for systematic reviews. Everything is scriptable so
 the figure in the manuscript is traceable to one data version. Use the offline workbench (`src/` → `dist/`) to manage multiple reviews via the Project Manager.

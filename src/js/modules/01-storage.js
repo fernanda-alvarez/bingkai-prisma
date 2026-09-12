@@ -346,6 +346,7 @@ let EXPECTED_DATA_KEYS = null;
       const bundle = {
         kind: "prisma2020.project-bundle.v1",
         exportedAt: new Date().toISOString(),
+        provenance: PROJECT_PROVENANCE,
         project: JSON.parse(JSON.stringify(cur)),
         csv: rowsToCSV()
       };

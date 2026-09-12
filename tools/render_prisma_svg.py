@@ -38,6 +38,11 @@ DEFAULT_FIGURES = DEFAULT_DIR / "figures"
 
 W, H = 1120, 1560
 FONT = "Arial, Helvetica, sans-serif"
+PROJECT_NAME = "Bingkai Prisma"
+CREATOR_NAME = "Fernanda Alvarez Pratama"
+CREATOR_URL = "https://github.com/fernanda-alvarez"
+REPOSITORY_URL = "https://github.com/fernanda-alvarez/bingkai-prisma"
+HOMEPAGE_URL = "https://bingkai-prisma.vercel.app"
 
 # --- Pro: single source layout (tools/layout.json ↔ src/js/modules/03-render.js) ---
 # If tools/layout.json exists and matches schema, allow Python to validate against it.
@@ -302,7 +307,12 @@ def render_svg(rows: list[list[str]], *, title: str, source_name: str,
                'markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
                '<path d="M 0 0 L 10 5 L 0 10 z" fill="#555555"/></marker>'
                "</defs>")
-    svg.append(f'<metadata><data-source>{esc(source_name)}</data-source>'
+    svg.append(f'<metadata><product>{esc(PROJECT_NAME)}</product>'
+               f'<creator>{esc(CREATOR_NAME)}</creator>'
+               f'<creator-url>{esc(CREATOR_URL)}</creator-url>'
+               f'<repository>{esc(REPOSITORY_URL)}</repository>'
+               f'<homepage>{esc(HOMEPAGE_URL)}</homepage>'
+               f'<data-source>{esc(source_name)}</data-source>'
                f'<generated>{esc(now.strftime("%Y-%m-%d %H:%M:%S"))}</generated>'
                f'<schema>PRISMA 2020 35x8</schema></metadata>')
 

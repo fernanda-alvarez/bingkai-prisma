@@ -3,7 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PRISMA Projects — dashboard</title>
+<meta name="description" content="Bingkai Prisma project dashboard for PRISMA 2020 reviews.">
+<meta name="author" content="Fernanda Alvarez Pratama">
+<meta name="creator" content="Fernanda Alvarez Pratama">
+<meta name="repository" content="https://github.com/fernanda-alvarez/bingkai-prisma">
+<link rel="author" href="https://github.com/fernanda-alvarez">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Bingkai Prisma",
+  "applicationCategory": "DeveloperApplication",
+  "author": { "@type": "Person", "name": "Fernanda Alvarez Pratama", "url": "https://github.com/fernanda-alvarez" },
+  "url": "https://bingkai-prisma.vercel.app",
+  "codeRepository": "https://github.com/fernanda-alvarez/bingkai-prisma"
+}
+</script>
+<title>Bingkai Prisma — Projects dashboard</title>
 <style>
   :root { --ink:#17324d; --muted:#64788b; --line:#d7e1e8; --page:#edf3f6; --panel:#fff; --blue:#246a9a; --blue-dark:#16476b; --yellow:#f7e6a5; }
   *{box-sizing:border-box}
@@ -36,7 +52,7 @@
 <div class="shell">
   <div class="masthead">
     <div>
-      <p class="eyebrow">PRISMA 2020</p>
+      <p class="eyebrow">Bingkai Prisma · PRISMA 2020</p>
       <h1>Projects dashboard</h1>
       <p class="helper" style="margin:4px 0 0;max-width:560px">Switch between reviews stored in this browser. Each project keeps its own numbers, visibility, and checkpoints. Use <em>Export bundle</em> to create a filesystem copy (JSON + CSV) for sharing or archiving.</p>
     </div>
@@ -59,11 +75,19 @@
   <div id="grid" class="grid"></div>
   <p class="helper" style="margin-top:14px">Hybrid workflow: edit in <code>PRISMA_2020_Offline.html</code> (auto-save per project) → <code>Export bundle</code> → save JSON to <code>exports/</code>. The standalone dashboard reads the same <code>localStorage</code> when both files are opened from the same folder via the same browser; if you opened via <code>file://</code> and see no projects, use <em>Import bundle</em> — that’s the filesystem handoff.</p>
 </div>
+  <footer class="helper" style="margin-top:20px;padding-top:12px;border-top:1px solid var(--line)">Bingkai Prisma · Created by <a href="https://github.com/fernanda-alvarez" target="_blank" rel="noreferrer">Fernanda Alvarez Pratama</a></footer>
 <script>
 "use strict";
 const PROJECTS_KEY = "prisma2020.projects.v1";
 const CURRENT_PID_KEY = "prisma2020.currentProjectId.v1";
 const LEGACY_CHECKPOINT_KEY = "prisma2020.offline.checkpoints.v1";
+const PROJECT_PROVENANCE = Object.freeze({
+  product: "Bingkai Prisma",
+  creator: "Fernanda Alvarez Pratama",
+  creatorUrl: "https://github.com/fernanda-alvarez",
+  repository: "https://github.com/fernanda-alvarez/bingkai-prisma",
+  homepage: "https://bingkai-prisma.vercel.app"
+});
 function uid(p){ return `${p}_${Date.now()}_${Math.random().toString(36).slice(2,7)}`; }
 function escapeHtml(s){ return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 function loadProjectsRaw(){
@@ -132,7 +156,7 @@ function openProject(pid){
 function exportBundle(pid){
   const proj=_data.projects.find(p=>p.id===pid);
   if(!proj) return;
-  const bundle={ kind:"prisma2020.project-bundle.v1", exportedAt:new Date().toISOString(), project:JSON.parse(JSON.stringify(proj)) };
+  const bundle={ kind:"prisma2020.project-bundle.v1", exportedAt:new Date().toISOString(), provenance:PROJECT_PROVENANCE, project:JSON.parse(JSON.stringify(proj)) };
   // also embed csv-like? workbench can regenerate; keep bundle minimal
   const blob=new Blob([JSON.stringify(bundle,null,2)], {type:"application/json"});
   const url=URL.createObjectURL(blob);
