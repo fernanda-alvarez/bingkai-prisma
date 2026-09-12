@@ -1,0 +1,87 @@
+/* tokens.css — Pro design tokens (keeps your blue/grey/yellow palette, refined) */
+:root{
+  /* core palette — your existing, slightly tuned for AA */
+  --ink:#17324d;
+  --ink-soft:#2a4a66;
+  --muted:#64788b;
+  --muted-2:#7a8c9e;
+  --line:#d7e1e8;
+  --line-strong:#b9cddb;
+  --panel:#ffffff;
+  --page:#edf3f6;
+  --page-accent:rgba(61,137,180,0.08);
+  --blue:#246a9a;
+  --blue-dark:#16476b;
+  --blue-soft:#e4f0f7;
+  --blue-ring:rgba(36,106,154,0.18);
+  --yellow:#f7e6a5;
+  --yellow-dark:#bd8b16;
+  --yellow-soft:#fef8dc;
+  --grey:#e4e8eb;
+  --grey-dark:#68727b;
+  --grey-soft:#f4f7f9;
+  --green:#2f9e6f;
+  --green-soft:#e8f4ed;
+  --red:#d85c42;
+  --red-soft:#fff0ec;
+  --amber:#b7790f;
+
+  /* new semantic tokens */
+  --focus: #0d5c92;
+  --focus-ring: rgba(13,92,146,0.18);
+  --shadow: 0 14px 34px rgba(28,55,77,0.08);
+  --shadow-soft: 0 8px 22px rgba(28,55,77,0.06);
+  --shadow-medium: 0 14px 34px rgba(28,55,77,0.10);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-xs: 4px;
+  --radius-full: 999px;
+
+  /* type */
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --font-mono: ui-monospace, Consolas, "Courier New", monospace;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+
+  /* space */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+
+  /* motion */
+  --ease: 140ms ease;
+  --ease-out: 220ms cubic-bezier(0.16,1,0.3,1);
+}
+
+/* dark preference — still respects your palette, just lifts */
+@media (prefers-color-scheme: dark){
+  :root{
+    --page:#0f1e2b;
+    --panel:#162a3a;
+    --line:#23394d;
+    --muted:#8aa0b6;
+    --ink:#e6eef5;
+  }
+  html{ background: var(--page); }
+  body{
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 90% 0%, rgba(61,137,180,0.16), transparent 36rem),
+      var(--page);
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important; }
+}
+
+/* focus visible — journal-grade keyboard affordance */
+:focus-visible{
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

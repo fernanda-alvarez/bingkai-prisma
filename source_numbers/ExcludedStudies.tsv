@@ -1,0 +1,18 @@
+# Excluded-studies table — single source for the PRISMA "Reports excluded" reasons.
+#
+# One tab-separated row per full-text report excluded at the eligibility stage.
+# Columns:  study_id<TAB>first_author<TAB>year<TAB>reason<TAB>branch
+#   branch   = databases | other        (which flow-diagram arm the report came from)
+#   reason   = keep it specific and reviewer-friendly, e.g. "wrong comparator",
+#              "duplicate publication", "conference abstract only",
+#              "no device comparison", "ineligible outcome data"
+#
+# Lines starting with '#' are ignored. Replace the EXAMPLE rows below with your
+# real records (see source_numbers/README.md for where each report's reason
+# comes from). Run:
+#   python tools/build_excluded_reasons.py --dry-run
+# to see the generated strings before writing a new export.
+#
+# EXAMPLE (delete these two rows before finalising):
+# ex-001<TAB>Van De Bruaene A<TAB>2012<TAB>conference abstract only<TAB>databases
+# ex-002<TAB>El-Harasis M<TAB>2021<TAB>no device comparison<TAB>databases

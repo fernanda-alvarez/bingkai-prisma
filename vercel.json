@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/PRISMA_Projects.html" }
+  ]
+}

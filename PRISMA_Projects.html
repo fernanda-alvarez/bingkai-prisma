@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRISMA Projects — dashboard</title>
+<style>
+  :root { --ink:#17324d; --muted:#64788b; --line:#d7e1e8; --page:#edf3f6; --panel:#fff; --blue:#246a9a; --blue-dark:#16476b; --yellow:#f7e6a5; }
+  *{box-sizing:border-box}
+  html{background:var(--page)}
+  body{margin:0;color:var(--ink);font:14px/1.45 "Segoe UI",Arial,sans-serif;background: radial-gradient(circle at 90% 0%, rgba(61,137,180,.08), transparent 32rem), var(--page);}
+  a{color:var(--blue)}
+  .shell{width:min(1200px, calc(100% - 32px));margin:0 auto;padding:18px 0 28px}
+  .masthead{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:14px}
+  h1{margin:0;font-size:26px;letter-spacing:-0.02em}
+  .eyebrow{margin:0 0 4px;color:var(--blue);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--line);background:var(--panel);box-shadow:0 8px 22px rgba(28,55,77,.06)}
+  .toolbar .spacer{flex:1}
+  button,.file-button{border:1px solid var(--blue-dark);padding:8px 11px;background:var(--blue-dark);color:#fff;font-weight:700;cursor:pointer}
+  button.secondary,.file-button.secondary{background:#fff;color:var(--blue-dark);border-color:#b4c8d5}
+  button:hover{filter:brightness(0.96)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .file-button{position:relative;overflow:hidden;display:inline-flex;align-items:center}
+  .file-button input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .helper{color:var(--muted);font-size:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-top:14px}
+  .card{border:1px solid var(--line);background:var(--panel);padding:14px;box-shadow:0 8px 22px rgba(28,55,77,.05)}
+  .card.current{border-color:var(--blue);box-shadow:0 0 0 2px rgba(36,106,154,.14)}
+  .pill{display:inline-block;background:var(--blue);color:#fff;font-size:10px;padding:2px 7px;border-radius:999px;font-weight:800;letter-spacing:.04em}
+  .meta{color:var(--muted);font-size:11px}
+  .notice{padding:12px;border:1px solid #c9dce7;background:rgba(255,255,255,.9);font-size:12px;color:#31546b}
+  code{background:#f2f7fa;padding:1px 5px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="masthead">
+    <div>
+      <p class="eyebrow">PRISMA 2020</p>
+      <h1>Projects dashboard</h1>
+      <p class="helper" style="margin:4px 0 0;max-width:560px">Switch between reviews stored in this browser. Each project keeps its own numbers, visibility, and checkpoints. Use <em>Export bundle</em> to create a filesystem copy (JSON + CSV) for sharing or archiving.</p>
+    </div>
+    <div class="helper" style="text-align:right">
+      <div id="storeInfo"></div>
+      <a href="PRISMA_2020_Offline.html" target="_blank">Open workbench →</a>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button id="newBtn" class="secondary" type="button">New project</button>
+    <label class="file-button secondary">Import bundle<input id="importInput" type="file" accept=".json,application/json"></label>
+    <button id="clearAllBtn" class="secondary" type="button">Clear ALL projects</button>
+    <div class="spacer"></div>
+    <span id="countLabel" class="helper"></span>
+    <button id="openWorkbenchBtn" type="button">Open workbench</button>
+  </div>
+
+  <div id="isolationNote" class="notice" style="margin-top:12px;display:none"></div>
+  <div id="grid" class="grid"></div>
+  <p class="helper" style="margin-top:14px">Hybrid workflow: edit in <code>PRISMA_2020_Offline.html</code> (auto-save per project) → <code>Export bundle</code> → save JSON to <code>exports/</code>. The standalone dashboard reads the same <code>localStorage</code> when both files are opened from the same folder via the same browser; if you opened via <code>file://</code> and see no projects, use <em>Import bundle</em> — that’s the filesystem handoff.</p>
+</div>
+<script>
+"use strict";
+const PROJECTS_KEY = "prisma2020.projects.v1";
+const CURRENT_PID_KEY = "prisma2020.currentProjectId.v1";
+const LEGACY_CHECKPOINT_KEY = "prisma2020.offline.checkpoints.v1";
+function uid(p){ return `${p}_${Date.now()}_${Math.random().toString(36).slice(2,7)}`; }
+function escapeHtml(s){ return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function loadProjectsRaw(){
+  try{ const raw=localStorage.getItem(PROJECTS_KEY); if(!raw) return null; const d=JSON.parse(raw); if(!d||!Array.isArray(d.projects)) return null; return d; }catch(_){ return null; }
+}
+function saveProjectsRaw(d){ try{ localStorage.setItem(PROJECTS_KEY, JSON.stringify(d)); }catch(_){} }
+function ensureProjects(){
+  let data=loadProjectsRaw();
+  if(data && data.projects.length) return data;
+  // seed one clean project if none
+  const first={ id:uid("proj"), name:"HOPECARDIS — clean template", createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), meta:{ reviewTitle:"HOPECARDIS — PFO closure devices", prosperoId:"", reviewId:"", notes:"" }, rows:[], settings:{}, checkpoints:[] };
+  // try to keep empty but signal that workbench will hydrate with DEFAULT_ROWS
+  data={ version:1, projects:[first] };
+  saveProjectsRaw(data);
+  try{ localStorage.setItem(CURRENT_PID_KEY, first.id); }catch(_){}
+  return data;
+}
+let _data = loadProjectsRaw();
+const isolationNote=document.getElementById("isolationNote");
+const grid=document.getElementById("grid");
+const countLabel=document.getElementById("countLabel");
+const storeInfo=document.getElementById("storeInfo");
+function refresh(){
+  const hasStore = (()=>{ try{ const t="__probe"; localStorage.setItem(t,"1"); localStorage.removeItem(t); return true;}catch(_){return false;}})();
+  storeInfo.textContent = hasStore ? "localStorage: available" : "localStorage: unavailable (private mode?)";
+  _data = loadProjectsRaw();
+  if(!_data || !_data.projects.length){
+    isolationNote.style.display="block";
+    isolationNote.innerHTML = `No projects found in this page’s <code>localStorage</code>. <br>When opening HTML via <code>file://</code>, Chrome/Firefox may isolate each file. Open <a href="PRISMA_2020_Offline.html">PRISMA_2020_Offline.html</a> directly — it will seed a clean project — then <em>Export bundle</em> there and <em>Import bundle</em> here to sync. Recent bundles in <code>exports/</code> can also be imported via the workbench.`;
+    grid.innerHTML = `<div class="card"><div class="helper">Use <em>New project</em> or <em>Import bundle</em> to get started.</div></div>`;
+    countLabel.textContent = "0 projects";
+    return;
+  }
+  isolationNote.style.display="none";
+  let curPid=null; try{ curPid=localStorage.getItem(CURRENT_PID_KEY);}catch(_){}
+  countLabel.textContent = `${_data.projects.length} project${_data.projects.length===1?"":"s"}`;
+  grid.innerHTML = _data.projects.map(p=>{
+    const isCur = p.id===curPid;
+    const pop = (p.rows||[]).filter(r=>r.n!==""&&r.n!=="0").length;
+    const cps = (p.checkpoints||[]).length;
+    const when=new Date(p.updatedAt).toLocaleString();
+    return `<div class="card ${isCur?"current":""}">
+      <div style="display:flex;justify-content:space-between;gap:8px">
+        <div style="min-width:0">
+          <div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(p.name)} ${isCur?'<span class="pill">current</span>':""}</div>
+          <div class="meta">${escapeHtml(p.meta?.reviewTitle||"")} ${p.meta?.prosperoId?`· PROSPERO ${escapeHtml(p.meta.prosperoId)}`:""}</div>
+          <div class="meta">Updated ${escapeHtml(when)} · ${pop} fields · ${cps} checkpoint${cps===1?"":"s"}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-content:start;flex-shrink:0">
+          ${isCur?"":`<button class="secondary" data-open="${escapeHtml(p.id)}">Open</button>`}
+          <button class="secondary" data-export="${escapeHtml(p.id)}">Export</button>
+          <button class="secondary" data-dup="${escapeHtml(p.id)}">Duplicate</button>
+          <button class="secondary" data-del="${escapeHtml(p.id)}" ${ _data.projects.length<=1?"disabled":""}>Delete</button>
+        </div>
+      </div>
+      ${p.meta?.notes?`<div class="helper" style="margin-top:8px;background:#f8fbfc;border:1px solid #e6edf1;padding:8px;white-space:pre-wrap">${escapeHtml(p.meta.notes)}</div>`:""}
+    </div>`;
+  }).join("");
+}
+function setCurrentPid(pid){ try{ localStorage.setItem(CURRENT_PID_KEY, pid);}catch(_){} }
+function openProject(pid){
+  setCurrentPid(pid);
+  refresh();
+  window.open(`PRISMA_2020_Offline.html#project=${encodeURIComponent(pid)}`, "_blank");
+}
+function exportBundle(pid){
+  const proj=_data.projects.find(p=>p.id===pid);
+  if(!proj) return;
+  const bundle={ kind:"prisma2020.project-bundle.v1", exportedAt:new Date().toISOString(), project:JSON.parse(JSON.stringify(proj)) };
+  // also embed csv-like? workbench can regenerate; keep bundle minimal
+  const blob=new Blob([JSON.stringify(bundle,null,2)], {type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  const safe=(proj.name||"project").replace(/[^a-z0-9\-_ ]/ig,"_").slice(0,40);
+  a.href=url; a.download=`${safe}_${new Date().toISOString().slice(0,10)}.prisma.json`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function duplicateProject(pid){
+  const src=_data.projects.find(p=>p.id===pid);
+  if(!src) return;
+  const dup={ ...JSON.parse(JSON.stringify(src)), id:uid("proj"), name:`${src.name} — copy`, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
+  _data.projects.push(dup);
+  saveProjectsRaw(_data);
+  setCurrentPid(dup.id);
+  refresh();
+}
+function deleteProject(pid){
+  if(_data.projects.length<=1) return alert("Cannot delete the last project.");
+  const t=_data.projects.find(p=>p.id===pid);
+  if(!confirm(`Delete project “${t?.name}”? This removes its numbers and checkpoints.`)) return;
+  _data.projects=_data.projects.filter(p=>p.id!==pid);
+  saveProjectsRaw(_data);
+  if(localStorage.getItem(CURRENT_PID_KEY)===pid) localStorage.setItem(CURRENT_PID_KEY, _data.projects[0].id);
+  refresh();
+}
+document.getElementById("newBtn").addEventListener("click", ()=>{
+  const def=`Project ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}`;
+  const name=prompt("New project name:", def);
+  if(name===null) return;
+  const trimmed=(name.trim()||def);
+  const proj={ id:uid("proj"), name:trimmed, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), meta:{reviewTitle:trimmed, prosperoId:"", reviewId:"", notes:""}, rows:[], settings:{}, checkpoints:[] };
+  // seed rows/settings as empty — workbench will hydrate from DEFAULT_ROWS on first open
+  // but we can also copy from current if exists
+  const curPid= (()=>{ try{return localStorage.getItem(CURRENT_PID_KEY);}catch(_){return null;}})();
+  const cur=_data?.projects.find(p=>p.id===curPid);
+  if(cur && cur.rows && cur.rows.length){ proj.rows=JSON.parse(JSON.stringify(cur.rows)); proj.settings=JSON.parse(JSON.stringify(cur.settings)); }
+  if(!_data) _data=ensureProjects();
+  _data.projects.push(proj);
+  saveProjectsRaw(_data);
+  setCurrentPid(proj.id);
+  refresh();
+  window.open("PRISMA_2020_Offline.html", "_blank");
+});
+document.getElementById("importInput").addEventListener("change", (e)=>{
+  const f=e.target.files?.[0];
+  if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const bundle=JSON.parse(String(r.result||""));
+      let proj=null;
+      if(bundle && bundle.project) proj=bundle.project;
+      else if(bundle && bundle.rows) proj={ id:uid("proj"), name: bundle.name||f.name.replace(/\.json$/,""), createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), meta: bundle.meta||{}, rows: bundle.rows, settings: bundle.settings||{}, checkpoints: bundle.checkpoints||[] };
+      else throw new Error("Unrecognized bundle.");
+      if(!proj.rows || !Array.isArray(proj.rows)) throw new Error("Bundle missing rows.");
+      proj.id=uid("proj");
+      proj.createdAt=new Date().toISOString();
+      proj.updatedAt=new Date().toISOString();
+      if(!_data) _data=ensureProjects();
+      _data.projects.push(proj);
+      saveProjectsRaw(_data);
+      setCurrentPid(proj.id);
+      refresh();
+      alert(`Imported “${proj.name}”. Opening workbench…`);
+      window.open("PRISMA_2020_Offline.html", "_blank");
+    }catch(err){ alert("Import failed: "+(err.message||err)); }
+    e.target.value="";
+  };
+  r.readAsText(f);
+});
+document.getElementById("clearAllBtn").addEventListener("click", ()=>{
+  if(!confirm("Clear ALL projects from this browser? This cannot be undone.")) return;
+  localStorage.removeItem(PROJECTS_KEY);
+  localStorage.removeItem(CURRENT_PID_KEY);
+  _data=ensureProjects();
+  refresh();
+});
+document.getElementById("openWorkbenchBtn").addEventListener("click", ()=> window.open("PRISMA_2020_Offline.html","_blank"));
+grid.addEventListener("click", (e)=>{
+  const o=e.target.closest("[data-open]"); if(o) return openProject(o.getAttribute("data-open"));
+  const ex=e.target.closest("[data-export]"); if(ex) return exportBundle(ex.getAttribute("data-export"));
+  const d=e.target.closest("[data-dup]"); if(d) return duplicateProject(d.getAttribute("data-dup"));
+  const del=e.target.closest("[data-del]"); if(del) return deleteProject(del.getAttribute("data-del"));
+});
+refresh();
+window.addEventListener("storage", refresh);
+</script>
+</body>
+</html>

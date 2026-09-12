@@ -1,0 +1,20 @@
+{
+  "name": "prisma2020-workbench",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "PRISMA 2020 offline workbench — modular source, single-file dist",
+  "scripts": {
+    "build": "node tools/build_offline_html.js",
+    "dev": "node tools/build_offline_html.js && echo 'Open src/template.html via file:// or run: npx serve src -l 5173' && echo 'For HMR, run: npx vite src --port 5173 (if vite installed)'",
+    "validate": "python tools/export_prisma_csv.py --validate-only",
+    "test": "vitest run --reporter=verbose",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "check:layout": "node tools/check_layout_sync.js",
+    "clean": "node -e \"import fs from 'fs'; fs.rmSync('dist',{recursive:true,force:true}); console.log('cleaned dist')\""
+  },
+  "keywords": ["prisma", "offline", "systematic-review"],
+  "author": "",
+  "license": "MIT"
+}

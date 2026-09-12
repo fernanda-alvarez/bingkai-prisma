@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- built from src/ — do not edit dist directly -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An offline PRISMA 2020 flow diagram editor and preview tool.">
+  <title>PRISMA 2020 Offline Workbench</title>
+  <!-- INJECT_STYLE -->
+</head>
+<body>
+  <div class="app-shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">Offline workbench</p>
+        <h1>PRISMA 2020 flow diagram</h1>
+        <p>Enter your review numbers, preview the flow, and export a reusable CSV or image without an internet connection.</p>
+      </div>
+      <p class="privacy-note"><strong>Runs locally.</strong><br>There are no external libraries, uploads, analytics, or network requests in this file.</p>
+    </header>
+
+    <div class="toolbar">
+      <div id="status" class="status" role="status">Ready with the edited workbook values.</div>
+      <div class="toolbar-actions">
+        <button id="openProjectsButton" class="secondary" type="button" style="display:inline-flex;align-items:center;gap:8px;font-weight:800">
+          <span style="width:8px;height:8px;border-radius:50%;background:#36a274;display:inline-block;flex:0 0 auto"></span>
+          <span id="toolbarProjectLabel">Projects</span>
+          <span id="toolbarProjectCount" style="background:#edf3f6;border:1px solid #c9dce7;padding:2px 6px;font-size:11px;color:#31546b"></span>
+        </button>
+        <!-- hidden selects kept for JS compat (populated but not shown) -->
+        <select id="projectSelect" style="display:none"></select>
+        <select id="projectSelect2" style="display:none"></select>
+        <input id="importBundleInput" type="file" accept=".json,application/json" style="display:none">
+        <input id="importBundleInput2" type="file" accept=".json,application/json" style="display:none">
+        <div class="export-group" aria-label="Export options">
+          <label class="file-button secondary">Import CSV<input id="csvInput" type="file" accept=".csv,text/csv"></label>
+          <button id="downloadCsv" class="secondary" type="button">Export CSV</button>
+          <button id="downloadSvg" class="secondary" type="button">Download SVG</button>
+          <button id="downloadPng" class="secondary" type="button">Download PNG (large text)</button>
+          <button id="printButton" class="secondary" type="button">Print</button>
+        </div>
+        <div class="export-group" aria-label="Memory options">
+          <button id="saveCheckpointButton" class="secondary" type="button" title="Freeze current edits as a named checkpoint">Save checkpoint</button>
+          <button id="manageCheckpointsButton" class="secondary" type="button">Checkpoints</button>
+        </div>
+        <button id="resetButton" class="secondary" type="button">Reset values</button>
+      </div>
+    </div>
+
+    <main class="workspace">
+      <nav class="section-nav" aria-label="Review workflow sections">
+        <div>
+          <h2>Edit workflow</h2>
+          <p>Choose one section at a time.</p>
+        </div>
+        <button type="button" data-section="projects">Projects <span class="nav-count" id="navProjectsCount"></span></button>
+        <button type="button" data-section="settings" aria-current="step">Settings</button>
+        <button type="button" data-section="identification">Identification <span class="nav-count">3</span></button>
+        <button type="button" data-section="screening">Screening <span class="nav-count">5</span></button>
+        <button type="button" data-section="eligibility">Eligibility <span class="nav-count">8</span></button>
+        <button type="button" data-section="included">Included <span class="nav-count">6</span></button>
+        <button type="button" data-section="checks">Checks</button>
+        <button type="button" data-section="visibility">Visibility</button>
+        <button type="button" data-section="advanced">Advanced</button>
+        <p class="nav-foot">The diagram stays visible while you edit.</p>
+      </nav>
+
+      <aside class="editor-panel" aria-label="PRISMA editor">
+        <section class="panel-card" data-editor-section="settings" hidden>
+          <div class="section-heading">
+            <div>
+              <h2>Diagram settings</h2>
+              <p>These display settings are kept in this browser tab.</p>
+            </div>
+          </div>
+          <div class="field-stack">
+            <div class="field">
+              <label for="diagramTitle">Preview heading</label>
+              <input id="diagramTitle" type="text" value="PRISMA 2020 Flow Diagram" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="diagramNote">Optional note <span>Shown below the diagram</span></label>
+              <textarea id="diagramNote" placeholder="Example: The search was completed in March 2026."></textarea>
+            </div>
+            <div class="toggle-list">
+              <label class="toggle"><input id="showPrevious" type="checkbox" checked><span>Show studies included in the previous version of the review</span></label>
+              <label class="toggle"><input id="showDatabases" type="checkbox" checked><span>Show identification via databases and registers</span></label>
+              <label class="toggle"><input id="showOther" type="checkbox" checked><span>Show identification via other methods</span></label>
+            </div>
+            <div class="editor-group" style="border-top:1px solid #e6edf1;padding-top:12px;margin-top:2px;">
+              <h3>Project <span id="projectCount"></span></h3>
+              <p class="helper" style="margin:0 0 8px;">Name and IDs travel with the project bundle and appear in the caption/sign-off.</p>
+              <div class="field-stack">
+                <div class="field"><label for="projectNameInput">Project name</label><input id="projectNameInput" type="text" autocomplete="off" placeholder="New review — clean template"></div>
+                <div class="field"><label for="projectReviewTitle">Review title <span>for caption</span></label><input id="projectReviewTitle" type="text" autocomplete="off" placeholder="PRISMA 2020 Flow Diagram"></div>
+                <div class="field"><label for="projectProspero">PROSPERO ID <span>optional</span></label><input id="projectProspero" type="text" autocomplete="off" placeholder="CRD420..."></div>
+                <div class="field"><label for="projectReviewId">Review ID <span>internal</span></label><input id="projectReviewId" type="text" autocomplete="off" placeholder="REVIEW-2026-001"></div>
+                <div class="field full"><label for="projectNotes">Notes <span>eligibility, search dates, etc.</span></label><textarea id="projectNotes" placeholder="Eligibility criteria, search log reference..."></textarea></div>
+              </div>
+              <div class="action-row" style="margin-top:10px">
+                <button id="newProjectButton2" class="secondary small" type="button">New project</button>
+                <button id="renameProjectButton2" class="secondary small" type="button">Rename</button>
+                <button id="duplicateProjectButton2" class="secondary small" type="button">Duplicate</button>
+                <button id="deleteProjectButton2" class="secondary small" type="button">Delete</button>
+                <button id="exportBundleButton2" class="secondary small" type="button">Export bundle</button>
+              </div>
+            </div>
+            <div class="editor-group" style="border-top:1px solid #e6edf1;padding-top:12px;margin-top:2px;">
+              <h3>Memory <span>auto-saved in this browser</span></h3>
+              <p class="helper" style="margin:0 0 8px;">Edits auto-save every second. Use checkpoints to freeze a version before trying new numbers; <strong>Clear memory</strong> removes everything stored for this page.</p>
+              <div class="action-row">
+                <button id="saveCheckpointButton2" class="secondary small" type="button">Save checkpoint</button>
+                <button id="manageCheckpointsButton2" class="secondary small" type="button">Manage checkpoints</button>
+                <button id="clearStorageButton2" class="secondary small" type="button">Clear memory</button>
+              </div>
+              <div id="checkpointSummary" class="helper" style="margin-top:8px;color:#31546b;"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel-card" data-editor-section="projects" hidden>
+          <div class="section-heading">
+            <div>
+              <h2>Projects</h2>
+              <p>Switch between PRISMA reviews. Projects live in this browser (<span id="projectCount2"></span>); <em>Export bundle</em> creates a filesystem copy (JSON with CSV).</p>
+            </div>
+          </div>
+          <div class="action-row" style="margin-bottom:12px">
+            <button id="newProjectButton3" class="secondary small" type="button">New project</button>
+            <label class="file-button secondary small">Import bundle<input id="importBundleInput2" type="file" accept=".json,application/json"></label>
+            <button id="clearAllProjectsButton" class="secondary small" type="button">Clear ALL projects</button>
+            <a href="PRISMA_Projects.html" target="_blank" class="file-button secondary small" style="text-decoration:none">Open dashboard →</a>
+          </div>
+          <div id="projectsDashboardGrid" style="display:grid;gap:10px"></div>
+          <p class="helper" style="margin-top:10px">Hybrid workflow: edit fast in-browser, then <code>Export bundle</code> per project to `exports/` or share with collaborators. Each project keeps its own numbers, visibility toggles, and checkpoints.</p>
+        </section>
+
+        <section class="panel-card" data-editor-section="data" hidden>
+          <div class="section-heading">
+            <div>
+              <h2>Review data</h2>
+              <p>Counts accept numbers or text such as exclusion reasons.</p>
+            </div>
+          </div>
+          <div id="editorFields"></div>
+        </section>
+
+        <section class="panel-card" data-editor-section="checks" hidden>
+          <div class="section-heading">
+            <div>
+              <h2>Consistency check</h2>
+              <p>Live balance checks between flow stages.</p>
+            </div>
+            <button id="autoFillButton" class="secondary small" type="button">Auto-fill</button>
+          </div>
+          <ul id="checkList" class="check-list" aria-live="polite"></ul>
+        </section>
+
+        <section class="panel-card" data-editor-section="visibility" hidden>
+          <div class="section-heading">
+            <div>
+              <h2>Diagram visibility</h2>
+              <p>Show or hide whole columns or individual boxes. Display only — CSV export always keeps the full 35-row schema.</p>
+            </div>
+            <button id="showAllVisibilityButton" class="secondary small" type="button">Show all</button>
+          </div>
+          <div id="visibilityGroups" class="visibility-groups"></div>
+        </section>
+
+        <details class="panel-card" data-editor-section="advanced" hidden>
+          <summary>Bulk table view</summary>
+          <div class="details-body">
+            <p class="helper">Spreadsheet-style editing of all 34 rows, synced with the diagram and CSV.
+              <button id="pasteTsvButton" class="secondary small" type="button">Paste TSV</button>
+            </p>
+            <div class="table-scroll">
+              <table class="bulk-table">
+                <thead>
+                  <tr><th>Box</th><th>Key</th><th>Description</th><th>Label</th><th>Count / text</th></tr>
+                </thead>
+                <tbody id="bulkTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+
+        <details class="panel-card" data-editor-section="advanced" hidden>
+          <summary>Diagram labels</summary>
+          <div class="details-body">
+            <p class="helper">Edit the visible box labels. CSV import and export preserve the complete 35-row schema, including descriptions, tooltips, and links.</p>
+            <div id="labelEditor" class="label-editor"></div>
+          </div>
+        </details>
+      </aside>
+
+      <section class="preview-panel" aria-label="PRISMA diagram preview">
+        <div class="preview-head">
+          <div>
+            <div class="preview-kicker">Live preview</div>
+            <div id="selectedInfo" class="selected-info">Click any diagram box to inspect its source row.</div>
+          </div>
+          <div class="preview-actions">
+            <div class="zoom-controls" aria-label="Diagram zoom">
+              <button id="zoomOut" class="secondary small" type="button" aria-label="Zoom out">−</button>
+              <span id="zoomLevel" class="zoom-level">100%</span>
+              <button id="zoomIn" class="secondary small" type="button" aria-label="Zoom in">+</button>
+              <button id="zoomFit" class="secondary small" type="button">Fit</button>
+            </div>
+            <button id="fullscreenButton" class="secondary small" type="button">Full screen</button>
+            <div id="stats" class="stats">35 CSV rows loaded</div>
+          </div>
+        </div>
+        <div class="svg-viewport">
+          <svg id="diagram" class="diagram-svg" viewBox="0 0 2140 1500" role="img" aria-labelledby="diagramTitleSvg diagramDescSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div class="preview-foot">
+          <span>Use Export CSV to continue editing in Excel or preserve the full data structure.</span>
+          <span id="lastUpdated">Updated just now</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      Based on the PRISMA 2020 flow diagram structure. Reference: <a href="https://estech.shinyapps.io/prisma_flowdiagram/" target="_blank" rel="noreferrer">PRISMA Flow Diagram Shiny app</a>.
+    </footer>
+  </div>
+
+  <div id="fullscreenOverlay" class="fullscreen-overlay" hidden>
+    <div class="fullscreen-header">
+      <strong>Diagram preview</strong>
+      <div class="toolbar-actions">
+        <button id="fullscreenPng" class="secondary small" type="button">Download PNG (large text)</button>
+        <button id="fullscreenSvg" class="secondary small" type="button">Download SVG</button>
+        <button id="fullscreenClose" class="secondary small" type="button">Close (Esc)</button>
+      </div>
+    </div>
+    <div id="fullscreenBody" class="fullscreen-body"></div>
+  </div>
+
+  <!-- Project Manager — separate window (dialog) -->
+  <dialog id="projectManagerDialog" style="border:1px solid #999;border-radius:8px;padding:0;max-width:920px;width:calc(100% - 24px);max-height:88vh;box-shadow:0 24px 48px rgba(28,55,77,.18)">
+    <div style="display:flex;flex-direction:column;max-height:88vh">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center;background:#f6fafc">
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">Project manager</div>
+          <div style="font-weight:800;font-size:16px;color:var(--ink)">Manage PRISMA reviews</div>
+          <div class="helper" style="margin:2px 0 0">Projects live in this browser · <span id="pmProjectCount"></span> · <code>Export bundle</code> creates a filesystem copy</div>
+        </div>
+        <button id="pmClose" class="secondary small" type="button">Close (Esc)</button>
+      </div>
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:0;min-height:0;flex:1">
+        <div style="border-right:1px solid var(--line);overflow:auto;padding:10px;background:#fbfdff">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <button id="pmNew" class="secondary small" type="button" style="flex:1">New project</button>
+            <label class="file-button secondary small" style="flex:1;justify-content:center">Import bundle<input id="pmImport" type="file" accept=".json,application/json"></label>
+          </div>
+          <div id="pmProjectList" style="display:grid;gap:8px"></div>
+          <button id="pmClearAll" class="secondary small" type="button" style="margin-top:10px;width:100%">Clear ALL projects</button>
+          <a href="PRISMA_Projects.html" target="_blank" class="helper" style="display:block;margin-top:8px;text-align:center">Open standalone dashboard →</a>
+        </div>
+        <div style="overflow:auto;padding:14px">
+          <div id="pmDetailEmpty" class="helper" style="padding:20px;text-align:center">Select a project on the left to view its details, metadata and checkpoints.</div>
+          <div id="pmDetail" hidden>
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+              <h3 style="margin:0;font-size:15px;color:var(--blue-dark)"><span id="pmDetailName"></span></h3>
+              <span id="pmDetailBadge" class="helper" style="background:#edf3f6;border:1px solid #c9dce7;padding:2px 6px"></span>
+            </div>
+            <p class="helper" style="margin:4px 0 10px" id="pmDetailMeta"></p>
+            <div class="field-stack">
+              <div class="field"><label for="pmProjectNameInput">Project name</label><input id="pmProjectNameInput" type="text"></div>
+              <div class="field"><label for="pmReviewTitle">Review title</label><input id="pmReviewTitle" type="text" placeholder="New systematic review"></div>
+              <div class="field"><label for="pmProspero">PROSPERO ID</label><input id="pmProspero" type="text" placeholder="CRD420..."></div>
+              <div class="field"><label for="pmReviewId">Review ID</label><input id="pmReviewId" type="text" placeholder="REVIEW-2026-001"></div>
+              <div class="field full"><label for="pmNotes">Notes</label><textarea id="pmNotes" rows="3" placeholder="Eligibility, search dates..."></textarea></div>
+            </div>
+            <div class="action-row" style="margin-top:12px;flex-wrap:wrap">
+              <button id="pmOpen" class="secondary small" type="button">Open in workbench</button>
+              <button id="pmRename" class="secondary small" type="button">Rename</button>
+              <button id="pmDuplicate" class="secondary small" type="button">Duplicate</button>
+              <button id="pmExport" class="secondary small" type="button">Export bundle</button>
+              <button id="pmDelete" class="secondary small" type="button">Delete</button>
+            </div>
+            <div style="margin-top:14px;border-top:1px solid #e6edf1;padding-top:12px">
+              <h4 style="margin:0 0 6px;font-size:13px;color:var(--blue-dark)">Checkpoints (isolated per project) <span id="pmCheckpointCount" class="helper"></span></h4>
+              <div id="pmCheckpointList" style="max-height:22vh;overflow:auto;border:1px solid #e6edf1"></div>
+              <div class="action-row" style="margin-top:8px">
+                <button id="pmSaveCheckpoint" class="secondary small" type="button">Save checkpoint</button>
+                <button id="pmManageCheckpoints" class="secondary small" type="button">Manage all</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- INJECT_SCRIPT -->
+</body>
+</html>
