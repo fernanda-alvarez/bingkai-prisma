@@ -22,7 +22,7 @@
   }
   </script>
   <title>Bingkai Prisma — PRISMA 2020 Workbench</title>
-  <!-- built 2026-09-13 08:28:46 from src/ -->
+  <!-- built 2026-09-13 08:32:38 from src/ -->
   <style>
 /* tokens.css — Pro design tokens (keeps your blue/grey/yellow palette, refined) */
 :root{
@@ -1308,6 +1308,32 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
     white-space:nowrap;
   }
   .mobile-action-bar button{flex:0 0 auto}
+}/* Compact utility menu */
+.utility-menu{display:contents}
+.utility-menu__toggle{display:none}
+.utility-menu__panel{display:flex;align-items:center;gap:6px}
+@container prisma-workspace (max-width:980px){
+  .utility-menu{display:block;position:relative;flex:0 0 auto}
+  .utility-menu__toggle{display:inline-flex}
+  .utility-menu__panel{
+    display:none;
+    position:absolute;
+    right:0;
+    top:calc(100% + 8px);
+    z-index:60;
+    min-width:190px;
+    padding:6px;
+    border:1px solid var(--line);
+    background:#fff;
+    box-shadow:0 12px 32px rgba(28,55,77,.16);
+  }
+  .utility-menu.is-open .utility-menu__panel{display:grid}
+  .utility-menu__panel button{width:100%;justify-content:flex-start}
+}
+@container prisma-workspace (max-width:680px){
+  .utility-menu{width:100%}
+  .utility-menu__toggle{width:100%;justify-content:center}
+  .utility-menu__panel{left:0;right:0}
 }
   </style>
 </head>
@@ -1382,11 +1408,14 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
           </div>
         </div>
 
-        <div class="export-group" aria-label="Memory options" style="gap:6px;">
-          <button id="saveCheckpointButton" class="secondary small" type="button" title="Freeze current edits as a named checkpoint">Save checkpoint</button>
-          <button id="manageCheckpointsButton" class="secondary small" type="button">Checkpoints</button>
+        <div class="utility-menu" aria-label="More workbench actions">
+          <button id="utilityMenuToggle" class="secondary small utility-menu__toggle" type="button" aria-expanded="false" aria-controls="utilityMenuPanel">More</button>
+          <div id="utilityMenuPanel" class="utility-menu__panel">
+            <button id="saveCheckpointButton" class="secondary small" type="button" title="Freeze current edits as a named checkpoint">Save checkpoint</button>
+            <button id="manageCheckpointsButton" class="secondary small" type="button">Checkpoints</button>
+            <button id="resetButton" class="secondary small" type="button">Reset values</button>
+          </div>
         </div>
-        <button id="resetButton" class="secondary small" type="button">Reset values</button>
       </div>
     </div>
 
@@ -3874,6 +3903,19 @@ editorFields.addEventListener("input", (event) => {
     document.getElementById("printButton").addEventListener("click", () => {
       if (privacyGuard("print")) window.print();
     });
+    const utilityMenu = document.querySelector(".utility-menu");
+    const utilityMenuToggle = document.getElementById("utilityMenuToggle");
+    if (utilityMenu && utilityMenuToggle) {
+      utilityMenuToggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const open = utilityMenu.classList.toggle("is-open");
+        utilityMenuToggle.setAttribute("aria-expanded", String(open));
+      });
+      document.addEventListener("click", () => {
+        utilityMenu.classList.remove("is-open");
+        utilityMenuToggle.setAttribute("aria-expanded", "false");
+      });
+    }
     document.getElementById("exportBundleQuick")?.addEventListener("click", () => exportCurrentProjectBundle());
     document.getElementById("privacyCheckButton")?.addEventListener("click", () => {
       const findings = privacyFindings();
