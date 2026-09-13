@@ -178,6 +178,19 @@ editorFields.addEventListener("input", (event) => {
     document.getElementById("printButton").addEventListener("click", () => {
       if (privacyGuard("print")) window.print();
     });
+    const utilityMenu = document.querySelector(".utility-menu");
+    const utilityMenuToggle = document.getElementById("utilityMenuToggle");
+    if (utilityMenu && utilityMenuToggle) {
+      utilityMenuToggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const open = utilityMenu.classList.toggle("is-open");
+        utilityMenuToggle.setAttribute("aria-expanded", String(open));
+      });
+      document.addEventListener("click", () => {
+        utilityMenu.classList.remove("is-open");
+        utilityMenuToggle.setAttribute("aria-expanded", "false");
+      });
+    }
     document.getElementById("exportBundleQuick")?.addEventListener("click", () => exportCurrentProjectBundle());
     document.getElementById("privacyCheckButton")?.addEventListener("click", () => {
       const findings = privacyFindings();
