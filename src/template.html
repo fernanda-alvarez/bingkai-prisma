@@ -43,7 +43,7 @@
           <span style="width:7px;height:7px;border-radius:50%;background:#36a274;display:inline-block;"></span>
           <span style="font-size:11px;">Local · Offline</span>
         </div>
-        <button id="openProjectsButton" class="secondary small" type="button" style="display:inline-flex;align-items:center;gap:8px;font-weight:800">
+        <button id="openProjectsButton" class="secondary small" type="button" aria-label="Open current project switcher" style="display:inline-flex;align-items:center;gap:8px;font-weight:800">
           <span style="width:8px;height:8px;border-radius:50%;background:#36a274;display:inline-block;flex:0 0 auto"></span>
           <span id="toolbarProjectLabel">Projects</span>
           <span id="toolbarProjectCount" class="badge badge--soft" style="padding:2px 6px;">0</span>
@@ -103,7 +103,7 @@
           <h2>Edit workflow</h2>
           <p>Guided 4-step flow — plus tools.</p>
         </div>
-        <button type="button" data-section="projects">Projects <span class="nav-count" id="navProjectsCount"></span></button>
+        <button type="button" data-section="projects">Project library <span class="nav-count" id="navProjectsCount"></span></button>
         <button type="button" data-section="settings" aria-current="step">Settings</button>
         <p class="section-nav__label">Review flow</p>
         <button type="button" data-section="identification">① Identification <span class="nav-count">3</span></button>
@@ -125,6 +125,15 @@
               <p>Display settings — kept in this browser tab. <span class="badge badge--soft" style="font-size:10px;">Auto-saved</span></p>
             </div>
           </div>
+          <div class="start-card" role="region" aria-labelledby="startReviewTitle">
+            <div class="start-card__eyebrow">Start here</div>
+            <h3 id="startReviewTitle">Build your PRISMA diagram</h3>
+            <p>Work from left to right: add identification counts, then screening, eligibility, and included studies. Your edits remain in this browser.</p>
+            <div class="action-row">
+              <button id="startReviewButton" class="small" type="button">Open Identification</button>
+              <button id="startImportButton" class="secondary small" type="button">Import CSV</button>
+            </div>
+          </div>
           <div class="field-stack">
             <div class="field">
               <label for="diagramTitle">Preview heading</label>
@@ -140,7 +149,7 @@
               <label class="toggle"><input id="showOther" type="checkbox" checked><span>Show identification via other methods</span></label>
             </div>
             <div class="editor-group" style="border-top:1px solid #e6edf1;padding-top:12px;margin-top:2px;">
-              <h3>Project <span id="projectCount"></span></h3>
+              <h3>Project details <span id="projectCount"></span></h3>
               <p class="helper" style="margin:0 0 8px;">Name and IDs travel with the project bundle and appear in the caption/sign-off.</p>
               <div class="field-stack">
                 <div class="field"><label for="projectNameInput">Project name</label><input id="projectNameInput" type="text" autocomplete="off" placeholder="New review — clean template"></div>
@@ -177,7 +186,7 @@
         <section class="panel-card" data-editor-section="projects" hidden>
           <div class="section-heading">
             <div>
-              <h2>Projects</h2>
+              <h2>Project library</h2>
               <p>Switch between PRISMA reviews. Projects live in this browser (<span id="projectCount2"></span>); <em>Export bundle</em> creates a filesystem copy (JSON with CSV).</p>
             </div>
           </div>
