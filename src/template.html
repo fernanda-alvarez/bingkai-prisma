@@ -66,6 +66,10 @@
         <div id="status" class="status" role="status">Ready with the edited workbook values.</div>
         <div class="toolbar__hint">Changes stay local and save automatically.</div>
       </div>
+      <div class="history-controls" aria-label="Edit history">
+        <button id="undoButton" class="secondary small" type="button" disabled>Undo</button>
+        <button id="redoButton" class="secondary small" type="button" disabled>Redo</button>
+      </div>
       <div class="toolbar-actions" style="align-items:center;">
         <!-- hidden selects kept for JS compat -->
         <select id="projectSelect" style="display:none"></select>
@@ -86,6 +90,8 @@
           <label class="ghost small" style="justify-content:space-between;display:flex;width:100%;cursor:pointer;border:1px solid transparent;padding:7px 10px;">Import CSV <span class="helper">.csv</span><input id="csvInput" type="file" accept=".csv,text/csv" style="display:none"></label>
           <div style="height:1px;background:var(--line);margin:2px 0;"></div>
           <button id="printButton" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Print <span class="helper">⌘P</span></button>
+          <button id="exportBundleQuick" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Export project bundle <span class="helper">.json</span></button>
+          <button id="privacyCheckButton" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Privacy check <span class="helper">scan</span></button>
           </div>
         </div>
 
@@ -106,10 +112,10 @@
         <button type="button" data-section="projects">Project library <span class="nav-count" id="navProjectsCount"></span></button>
         <button type="button" data-section="settings" aria-current="step">Settings</button>
         <p class="section-nav__label">Review flow</p>
-        <button type="button" data-section="identification">① Identification <span class="nav-count">3</span></button>
-        <button type="button" data-section="screening">② Screening <span class="nav-count">5</span></button>
-        <button type="button" data-section="eligibility">③ Eligibility <span class="nav-count">8</span></button>
-        <button type="button" data-section="included">④ Included <span class="nav-count">6</span></button>
+        <button type="button" data-section="identification">① Identification <span class="nav-count" data-step-progress="identification">0/9</span></button>
+        <button type="button" data-section="screening">② Screening <span class="nav-count" data-step-progress="screening">0/5</span></button>
+        <button type="button" data-section="eligibility">③ Eligibility <span class="nav-count" data-step-progress="eligibility">0/8</span></button>
+        <button type="button" data-section="included">④ Included <span class="nav-count" data-step-progress="included">0/6</span></button>
         <p class="section-nav__label">Tools</p>
         <button type="button" data-section="checks">Checks <span id="navChecksBadge" class="badge badge--muted" style="font-size:10px;padding:1px 6px;"></span></button>
         <button type="button" data-section="visibility">Visibility</button>
@@ -269,9 +275,9 @@
           <div class="preview-actions">
             <div class="zoom-controls" aria-label="Diagram zoom">
               <button id="zoomOut" class="secondary small" type="button" aria-label="Zoom out">−</button>
-              <span id="zoomLevel" class="zoom-level">100%</span>
+              <span id="zoomLevel" class="zoom-level" aria-live="polite">100%</span>
               <button id="zoomIn" class="secondary small" type="button" aria-label="Zoom in">+</button>
-              <button id="zoomFit" class="secondary small" type="button">Fit</button>
+              <button id="zoomFit" class="secondary small" type="button">Fit width</button>
             </div>
             <button id="fullscreenButton" class="secondary small" type="button">Full screen</button>
             <div id="stats" class="stats">35 CSV rows loaded</div>
@@ -311,7 +317,11 @@
   </div>
 
   <!-- Command Palette (Pro) -->
-  <div id="cmdPaletteOverlay" class="cmdk-overlay" hidden>
+  <dialog id="importPreviewDialog" class="prisma-dialog" aria-labelledby="importPreviewTitle">
+    <div class="prisma-dialog__head"><div><div class="eyebrow" style="margin:0">Import review</div><div id="importPreviewTitle" style="font-weight:800;font-size:16px;color:var(--ink)">Preview before replacing data</div></div><button id="importPreviewCancel" class="secondary small" type="button">Cancel</button></div>
+    <div class="prisma-dialog__body"><div id="importPreviewSummary" class="import-preview-summary"></div><p class="helper" style="margin:10px 0 0">Nothing changes until you choose <strong>Import data</strong>.</p><div class="action-row" style="justify-content:flex-end;margin-top:14px"><button id="importPreviewCancel2" class="secondary small" type="button">Cancel</button><button id="importPreviewConfirm" class="small" type="button">Import data</button></div></div>
+  </dialog>
+  <div id="cmdPaletteOverlay class="cmdk-overlay" hidden>
     <div class="cmdk" role="dialog" aria-modal="true" aria-label="Command palette">
       <input id="cmdPaletteInput" class="cmdk__input" type="text" placeholder="Type a command or search…  (e.g., “duplicates”, “export csv”, “hide other”)" autocomplete="off">
       <div id="cmdPaletteList" class="cmdk__list" role="listbox"></div>
