@@ -1015,4 +1015,30 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
     white-space:nowrap;
   }
   .mobile-action-bar button{flex:0 0 auto}
+}/* Compact utility menu */
+.utility-menu{display:contents}
+.utility-menu__toggle{display:none}
+.utility-menu__panel{display:flex;align-items:center;gap:6px}
+@container prisma-workspace (max-width:980px){
+  .utility-menu{display:block;position:relative;flex:0 0 auto}
+  .utility-menu__toggle{display:inline-flex}
+  .utility-menu__panel{
+    display:none;
+    position:absolute;
+    right:0;
+    top:calc(100% + 8px);
+    z-index:60;
+    min-width:190px;
+    padding:6px;
+    border:1px solid var(--line);
+    background:#fff;
+    box-shadow:0 12px 32px rgba(28,55,77,.16);
+  }
+  .utility-menu.is-open .utility-menu__panel{display:grid}
+  .utility-menu__panel button{width:100%;justify-content:flex-start}
+}
+@container prisma-workspace (max-width:680px){
+  .utility-menu{width:100%}
+  .utility-menu__toggle{width:100%;justify-content:center}
+  .utility-menu__panel{left:0;right:0}
 }
