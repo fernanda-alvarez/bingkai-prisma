@@ -95,11 +95,14 @@
           </div>
         </div>
 
-        <div class="export-group" aria-label="Memory options" style="gap:6px;">
-          <button id="saveCheckpointButton" class="secondary small" type="button" title="Freeze current edits as a named checkpoint">Save checkpoint</button>
-          <button id="manageCheckpointsButton" class="secondary small" type="button">Checkpoints</button>
+        <div class="utility-menu" aria-label="More workbench actions">
+          <button id="utilityMenuToggle" class="secondary small utility-menu__toggle" type="button" aria-expanded="false" aria-controls="utilityMenuPanel">More</button>
+          <div id="utilityMenuPanel" class="utility-menu__panel">
+            <button id="saveCheckpointButton" class="secondary small" type="button" title="Freeze current edits as a named checkpoint">Save checkpoint</button>
+            <button id="manageCheckpointsButton" class="secondary small" type="button">Checkpoints</button>
+            <button id="resetButton" class="secondary small" type="button">Reset values</button>
+          </div>
         </div>
-        <button id="resetButton" class="secondary small" type="button">Reset values</button>
       </div>
     </div>
 
