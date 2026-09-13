@@ -84,9 +84,9 @@
             <button id="exportSplitToggle" class="secondary small" type="button" aria-label="More export options" style="padding:7px 8px;">▾</button>
           </div>
           <div id="exportSplitMenu" class="prisma-card" hidden style="position:absolute;right:0;top:calc(100% + 8px);z-index:50;min-width:240px;padding:6px;display:grid;gap:4px;box-shadow:0 12px 32px rgba(28,55,77,0.16);max-width:calc(100vw - 24px);">
-          <button id="downloadCsv" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Export CSV <span class="helper">.csv</span></button>
-          <button id="downloadSvg" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Download SVG <span class="helper">vector</span></button>
-          <button id="downloadPng" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Download PNG <span class="helper">3× large text</span></button>
+          <button id="downloadCsv" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Export editable CSV <span class="helper">.csv</span></button>
+          <button id="downloadSvg" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Download publication SVG <span class="helper">vector</span></button>
+          <button id="downloadPng" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Download high-res PNG <span class="helper">3× large text</span></button>
           <label class="ghost small" style="justify-content:space-between;display:flex;width:100%;cursor:pointer;border:1px solid transparent;padding:7px 10px;">Import CSV <span class="helper">.csv</span><input id="csvInput" type="file" accept=".csv,text/csv" style="display:none"></label>
           <div style="height:1px;background:var(--line);margin:2px 0;"></div>
           <button id="printButton" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Print <span class="helper">⌘P</span></button>
@@ -138,6 +138,7 @@
             <div class="action-row">
               <button id="startReviewButton" class="small" type="button">Open Identification</button>
               <button id="startImportButton" class="secondary small" type="button">Import CSV</button>
+              <button id="tryExampleButton" class="secondary small" type="button">Try demo data</button>
             </div>
           </div>
           <div class="field-stack">
@@ -298,6 +299,11 @@
         </div>
       </section>
     </main>
+      <div id="mobileActionBar" class="mobile-action-bar" aria-label="Quick actions">
+        <span id="mobileStepName" class="mobile-action-bar__step">Settings</span>
+        <button id="mobilePreviewButton" class="secondary small" type="button">Preview</button>
+        <button id="mobileExportButton" class="small" type="button">Export</button>
+      </div>
 
     <footer class="footer">
       Based on the PRISMA 2020 flow diagram structure. Reference: <a href="https://estech.shinyapps.io/prisma_flowdiagram/" target="_blank" rel="noreferrer">PRISMA Flow Diagram Shiny app</a>. · <span class="badge badge--muted">Pro Overhaul · Solo edition · v1.1</span> · <span>Created by <a href="https://github.com/fernanda-alvarez" target="_blank" rel="noreferrer">Fernanda Alvarez Pratama</a></span>
