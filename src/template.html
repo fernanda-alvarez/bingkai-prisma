@@ -29,7 +29,7 @@
     <!-- ── Pro Top Bar (replaces large masthead) ── -->
     <div class="topbar" role="banner">
       <div class="topbar__brand">
-        <div class="topbar__logo" aria-hidden="true">P</div>
+        <div class="topbar__logo" aria-hidden="true"><svg viewBox="0 0 64 64" focusable="false"><rect x="12" y="12" width="44" height="44" rx="0" fill="#f5cf4d"></rect><rect x="6" y="6" width="44" height="44" rx="0" fill="#1768b0"></rect><path d="M19 15h17l7 7v22H19z" fill="#fff"></path><path d="M36 15v8h7" fill="#dbeefa"></path><path d="M24 31h14M24 37h14M24 43h8" fill="none" stroke="#1768b0" stroke-linecap="round" stroke-width="3"></path></svg></div>
         <div style="min-width:0">
           <div class="topbar__title">Bingkai Prisma <span style="font-weight:500;color:var(--muted)">· PRISMA 2020 Workbench</span></div>
           <div class="topbar__subtitle"><span class="eyebrow" style="margin:0;font-size:10px;">PRISMA 2020 flow diagram</span> — offline, no uploads, no tracking · <span id="topbarProjectSubtitle" class="helper" style="font-size:11px;">New review — clean template</span></div>
@@ -62,7 +62,10 @@
     </header>
 
     <div class="toolbar" style="position:relative;z-index:10;overflow:visible;">
-      <div id="status" class="status" role="status">Ready with the edited workbook values.</div>
+      <div class="toolbar__status">
+        <div id="status" class="status" role="status">Ready with the edited workbook values.</div>
+        <div class="toolbar__hint">Changes stay local and save automatically.</div>
+      </div>
       <div class="toolbar-actions" style="align-items:center;">
         <!-- hidden selects kept for JS compat -->
         <select id="projectSelect" style="display:none"></select>
@@ -102,10 +105,12 @@
         </div>
         <button type="button" data-section="projects">Projects <span class="nav-count" id="navProjectsCount"></span></button>
         <button type="button" data-section="settings" aria-current="step">Settings</button>
+        <p class="section-nav__label">Review flow</p>
         <button type="button" data-section="identification">① Identification <span class="nav-count">3</span></button>
         <button type="button" data-section="screening">② Screening <span class="nav-count">5</span></button>
         <button type="button" data-section="eligibility">③ Eligibility <span class="nav-count">8</span></button>
         <button type="button" data-section="included">④ Included <span class="nav-count">6</span></button>
+        <p class="section-nav__label">Tools</p>
         <button type="button" data-section="checks">Checks <span id="navChecksBadge" class="badge badge--muted" style="font-size:10px;padding:1px 6px;"></span></button>
         <button type="button" data-section="visibility">Visibility</button>
         <button type="button" data-section="advanced">Advanced</button>
@@ -365,3 +370,4 @@
   <!-- INJECT_SCRIPT -->
 </body>
 </html>
+
