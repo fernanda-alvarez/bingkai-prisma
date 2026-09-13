@@ -205,6 +205,9 @@ editorFields.addEventListener("input", (event) => {
 
     document.getElementById("startReviewButton")?.addEventListener("click", () => showEditorSection("identification"));
     document.getElementById("startImportButton")?.addEventListener("click", () => document.getElementById("csvInput")?.click());
+    document.getElementById("tryExampleButton")?.addEventListener("click", loadExampleData);
+    document.getElementById("mobilePreviewButton")?.addEventListener("click", openFullscreen);
+    document.getElementById("mobileExportButton")?.addEventListener("click", () => document.getElementById("exportSplitMain")?.click());
 
     checkList.addEventListener("click", (event) => {
       const target = event.target.closest?.("[data-focus-id]");
