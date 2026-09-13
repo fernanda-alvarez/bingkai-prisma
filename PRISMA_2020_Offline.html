@@ -22,7 +22,7 @@
   }
   </script>
   <title>Bingkai Prisma — PRISMA 2020 Workbench</title>
-  <!-- built 2026-09-12 14:26:40 from src/ -->
+  <!-- built 2026-09-13 08:24:26 from src/ -->
   <style>
 /* tokens.css — Pro design tokens (keeps your blue/grey/yellow palette, refined) */
 :root{
@@ -1106,7 +1106,6 @@ dialog.prisma-dialog::backdrop{
       .diagram-svg { width: 100%; min-width: 0; border: 0; }
       .fullscreen-overlay { display: none !important; }
     }
-
 /* Workbench visual refresh */
 @font-face{font-family:"Plus Jakarta Sans";src:url("fonts/plus-jakarta-sans-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:"Plus Jakarta Sans";src:url("fonts/plus-jakarta-sans-latin-500-normal.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
@@ -1217,6 +1216,66 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
   border-color:#d85c42;
   background:#fff0ec;
 }
+/* Adaptive workspace */
+.workspace{container-type:inline-size;container-name:prisma-workspace;min-width:0}
+.workspace > *,.editor-panel,.preview-panel,.preview-head,.preview-actions,.toolbar-actions{min-width:0}
+.preview-panel{overflow:hidden}
+.preview-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.preview-actions{display:flex;align-items:center}
+.history-controls{display:flex;gap:6px;align-items:center;flex:0 0 auto}
+.history-controls button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.step-complete .nav-count{background:var(--green-soft);color:#1a6b4a;border-color:#bfe0cc}
+.import-preview-summary{padding:12px;border:1px solid var(--line);border-left:4px solid var(--blue);background:#f7fbfd;line-height:1.55}
+.import-preview-summary strong{color:var(--blue-dark)}
+@container prisma-workspace (max-width:1350px){
+  .workspace{grid-template-columns:190px minmax(0,1fr);grid-template-areas:"nav preview" "nav editor";align-items:start}
+  .section-nav{grid-area:nav;position:sticky;top:16px}
+  .preview-panel{grid-area:preview;min-height:520px}
+  .editor-panel{grid-area:editor;max-height:none}
+  .svg-viewport{min-height:520px}
+  .toolbar-actions{justify-content:flex-start}
+}
+@container prisma-workspace (max-width:980px){
+  .workspace{display:flex;flex-direction:column;gap:14px}
+  .section-nav{order:1;position:static;width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch}
+  .section-nav > div:first-child,.section-nav__label,.nav-foot{grid-column:1 / -1}
+  .preview-panel{order:2;width:100%;min-height:0}
+  .editor-panel{order:3;width:100%;max-height:none;overflow:visible}
+  .preview-head{align-items:stretch;flex-direction:column;gap:10px}
+  .preview-actions{justify-content:flex-start;flex-wrap:wrap}
+  .toolbar{align-items:flex-start;flex-wrap:wrap}
+  .toolbar__status{flex:1 1 260px}
+  .history-controls{order:2}
+  .toolbar-actions{order:3;width:100%;justify-content:flex-start}
+  .svg-viewport{min-height:440px}
+}
+@container prisma-workspace (max-width:680px){
+  .section-nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .section-nav button{min-height:42px;text-align:left}
+  .toolbar-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .toolbar-actions > *{min-width:0}
+  .export-group{display:contents}
+  .toolbar-actions .split-button,.toolbar-actions .split-button > button{width:100%}
+  .history-controls{width:100%;order:2}
+  .history-controls button{flex:1}
+  .preview-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .preview-actions > *{width:100%}
+  .zoom-controls{grid-column:1 / -1;display:flex;justify-content:center}
+  .svg-viewport{min-height:360px;padding:8px;overflow:auto}
+  .diagram-svg{min-width:680px!important;max-width:none}
+  .start-card{padding:14px}
+}
+@container prisma-workspace (max-width:460px){
+  .app-shell{width:calc(100% - 20px);padding-top:10px}
+  .topbar__brand{width:100%}
+  .topbar__subtitle{white-space:normal;max-width:100%}
+  .topbar > div:last-child{width:100%;justify-content:flex-start!important}
+  .toolbar-actions{display:flex;flex-direction:column;align-items:stretch}
+  .toolbar-actions > *,.toolbar-actions .split-button,.toolbar-actions .split-button > button{width:100%}
+  .preview-actions{display:flex;flex-direction:column;align-items:stretch}
+  .preview-actions > *,.preview-actions .zoom-controls{width:100%}
+  .panel-card{padding:14px}
+}
   </style>
 </head>
 <body>
@@ -1258,11 +1317,12 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
 
     <div class="toolbar" style="position:relative;z-index:10;overflow:visible;">
       <div class="toolbar__status">
-        <div class="toolbar__status">
         <div id="status" class="status" role="status">Ready with the edited workbook values.</div>
         <div class="toolbar__hint">Changes stay local and save automatically.</div>
       </div>
-        <div class="toolbar__hint">Changes stay local and save automatically.</div>
+      <div class="history-controls" aria-label="Edit history">
+        <button id="undoButton" class="secondary small" type="button" disabled>Undo</button>
+        <button id="redoButton" class="secondary small" type="button" disabled>Redo</button>
       </div>
       <div class="toolbar-actions" style="align-items:center;">
         <!-- hidden selects kept for JS compat -->
@@ -1284,6 +1344,8 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
           <label class="ghost small" style="justify-content:space-between;display:flex;width:100%;cursor:pointer;border:1px solid transparent;padding:7px 10px;">Import CSV <span class="helper">.csv</span><input id="csvInput" type="file" accept=".csv,text/csv" style="display:none"></label>
           <div style="height:1px;background:var(--line);margin:2px 0;"></div>
           <button id="printButton" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Print <span class="helper">⌘P</span></button>
+          <button id="exportBundleQuick" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Export project bundle <span class="helper">.json</span></button>
+          <button id="privacyCheckButton" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Privacy check <span class="helper">scan</span></button>
           </div>
         </div>
 
@@ -1304,10 +1366,10 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
         <button type="button" data-section="projects">Project library <span class="nav-count" id="navProjectsCount"></span></button>
         <button type="button" data-section="settings" aria-current="step">Settings</button>
         <p class="section-nav__label">Review flow</p>
-        <button type="button" data-section="identification">① Identification <span class="nav-count">3</span></button>
-        <button type="button" data-section="screening">② Screening <span class="nav-count">5</span></button>
-        <button type="button" data-section="eligibility">③ Eligibility <span class="nav-count">8</span></button>
-        <button type="button" data-section="included">④ Included <span class="nav-count">6</span></button>
+        <button type="button" data-section="identification">① Identification <span class="nav-count" data-step-progress="identification">0/9</span></button>
+        <button type="button" data-section="screening">② Screening <span class="nav-count" data-step-progress="screening">0/5</span></button>
+        <button type="button" data-section="eligibility">③ Eligibility <span class="nav-count" data-step-progress="eligibility">0/8</span></button>
+        <button type="button" data-section="included">④ Included <span class="nav-count" data-step-progress="included">0/6</span></button>
         <p class="section-nav__label">Tools</p>
         <button type="button" data-section="checks">Checks <span id="navChecksBadge" class="badge badge--muted" style="font-size:10px;padding:1px 6px;"></span></button>
         <button type="button" data-section="visibility">Visibility</button>
@@ -1467,9 +1529,9 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
           <div class="preview-actions">
             <div class="zoom-controls" aria-label="Diagram zoom">
               <button id="zoomOut" class="secondary small" type="button" aria-label="Zoom out">−</button>
-              <span id="zoomLevel" class="zoom-level">100%</span>
+              <span id="zoomLevel" class="zoom-level" aria-live="polite">100%</span>
               <button id="zoomIn" class="secondary small" type="button" aria-label="Zoom in">+</button>
-              <button id="zoomFit" class="secondary small" type="button">Fit</button>
+              <button id="zoomFit" class="secondary small" type="button">Fit width</button>
             </div>
             <button id="fullscreenButton" class="secondary small" type="button">Full screen</button>
             <div id="stats" class="stats">35 CSV rows loaded</div>
@@ -1509,7 +1571,11 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
   </div>
 
   <!-- Command Palette (Pro) -->
-  <div id="cmdPaletteOverlay" class="cmdk-overlay" hidden>
+  <dialog id="importPreviewDialog" class="prisma-dialog" aria-labelledby="importPreviewTitle">
+    <div class="prisma-dialog__head"><div><div class="eyebrow" style="margin:0">Import review</div><div id="importPreviewTitle" style="font-weight:800;font-size:16px;color:var(--ink)">Preview before replacing data</div></div><button id="importPreviewCancel" class="secondary small" type="button">Cancel</button></div>
+    <div class="prisma-dialog__body"><div id="importPreviewSummary" class="import-preview-summary"></div><p class="helper" style="margin:10px 0 0">Nothing changes until you choose <strong>Import data</strong>.</p><div class="action-row" style="justify-content:flex-end;margin-top:14px"><button id="importPreviewCancel2" class="secondary small" type="button">Cancel</button><button id="importPreviewConfirm" class="small" type="button">Import data</button></div></div>
+  </dialog>
+  <div id="cmdPaletteOverlay class="cmdk-overlay" hidden>
     <div class="cmdk" role="dialog" aria-modal="true" aria-label="Command palette">
       <input id="cmdPaletteInput" class="cmdk__input" type="text" placeholder="Type a command or search…  (e.g., “duplicates”, “export csv”, “hide other”)" autocomplete="off">
       <div id="cmdPaletteList" class="cmdk__list" role="listbox"></div>
@@ -2020,6 +2086,7 @@ let EXPECTED_DATA_KEYS = null;
       setStatus(`Deleted. Switched to “${next.name}”.`);
     }
     function exportCurrentProjectBundle() {
+      if (typeof privacyGuard === "function" && !privacyGuard("project bundle")) return;
       const cur = getCurrentProject();
       if (!cur) return;
       // ensure latest edits are captured
@@ -2252,6 +2319,101 @@ let EXPECTED_DATA_KEYS = null;
     }
 
     let saveTimer = null;
+    const HISTORY_LIMIT = 50;
+    let undoStack = [];
+    let redoStack = [];
+    let historyBefore = null;
+    let historyTimer = null;
+    let historyRestoring = false;
+
+    function historySnapshot() {
+      return { rows: cloneRows(rows), settings: JSON.parse(JSON.stringify(settings)) };
+    }
+
+    function historySignature(snapshot) { return JSON.stringify(snapshot); }
+
+    function beginHistory() {
+      if (historyRestoring || historyBefore) return;
+      historyBefore = historySnapshot();
+      window.clearTimeout(historyTimer);
+      historyTimer = null;
+    }
+
+    function commitHistory() {
+      if (!historyBefore) return;
+      const current = historySnapshot();
+      if (historySignature(historyBefore) !== historySignature(current)) {
+        undoStack.push(historyBefore);
+        if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+        redoStack = [];
+      }
+      historyBefore = null;
+      window.clearTimeout(historyTimer);
+      historyTimer = null;
+      updateHistoryUI();
+    }
+
+    function queueHistoryCommit() {
+      window.clearTimeout(historyTimer);
+      historyTimer = window.setTimeout(commitHistory, 500);
+    }
+
+    function resetHistoryBaseline() {
+      historyBefore = null;
+      undoStack = [];
+      redoStack = [];
+      window.clearTimeout(historyTimer);
+      historyTimer = null;
+      updateHistoryUI();
+    }
+
+    function updateHistoryUI() {
+      const undo = document.getElementById("undoButton");
+      const redo = document.getElementById("redoButton");
+      if (undo) {
+        undo.disabled = undoStack.length === 0;
+        undo.title = undo.disabled ? "Nothing to undo" : "Undo (" + undoStack.length + " available)";
+      }
+      if (redo) {
+        redo.disabled = redoStack.length === 0;
+        redo.title = redo.disabled ? "Nothing to redo" : "Redo (" + redoStack.length + " available)";
+      }
+    }
+
+    function applyHistorySnapshot(snapshot) {
+      historyRestoring = true;
+      rows = cloneRows(snapshot.rows);
+      settings = JSON.parse(JSON.stringify(snapshot.settings));
+      renderEditor();
+      renderLabelEditor();
+      renderBulkTable();
+      renderVisibilityPanel();
+      syncSettingsControls();
+      renderDiagram();
+      if (typeof updateProjectUI === "function") updateProjectUI();
+      historyRestoring = false;
+    }
+
+    function undoEdit() {
+      commitHistory();
+      if (!undoStack.length) return;
+      const current = historySnapshot();
+      redoStack.push(current);
+      applyHistorySnapshot(undoStack.pop());
+      updateHistoryUI();
+      setStatus("Undid the last edit.");
+    }
+
+    function redoEdit() {
+      commitHistory();
+      if (!redoStack.length) return;
+      const current = historySnapshot();
+      undoStack.push(current);
+      applyHistorySnapshot(redoStack.pop());
+      updateHistoryUI();
+      setStatus("Redid the last edit.");
+    }
+
     function scheduleSave() {
       window.clearTimeout(saveTimer);
       saveTimer = window.setTimeout(() => {
@@ -2472,6 +2634,40 @@ let EXPECTED_DATA_KEYS = null;
     function setStatus(message, isError = false) {
       status.textContent = message;
       status.classList.toggle("error", isError);
+    }
+
+    function privacyFindings() {
+      const cur = typeof getCurrentProject === "function" ? getCurrentProject() : null;
+      const corpus = [
+        rowsToCSV(), settings?.title || "", settings?.note || "", cur?.name || "",
+        cur?.meta?.reviewTitle || "", cur?.meta?.prosperoId || "", cur?.meta?.reviewId || "", cur?.meta?.notes || ""
+      ].join("\n");
+      const rules = [
+        { label: "email address", re: /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/ig },
+        { label: "local file path", re: /(?:[A-Z]:\\|\\\\[^\s]+|\/Users\/|\/home\/)/g },
+        { label: "private key or access token", re: /-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:ghp_|github_pat_|sk-[A-Za-z0-9])[A-Za-z0-9_-]*/g },
+        { label: "password or API key pattern", re: /\b(?:password|passwd|api[_-]?key|secret)\s*[:=]/ig },
+        { label: "review identifier", re: /\b(?:CRD\d{6,}|PROSPERO|REVIEW[-_][A-Z0-9-]+)\b/ig },
+        { label: "possible participant/patient data", re: /\b(?:patient|participant|date of birth|address|phone number)\b/ig }
+      ];
+      const findings = [];
+      for (const rule of rules) {
+        if (rule.re.test(corpus)) findings.push(rule.label);
+        rule.re.lastIndex = 0;
+      }
+      return [...new Set(findings)];
+    }
+
+    function privacyGuard(action = "export") {
+      const findings = privacyFindings();
+      if (!findings.length) {
+        setStatus("Privacy check passed before " + action + ".");
+        return true;
+      }
+      const list = findings.map((item) => "• " + item).join("\n");
+      const allowed = window.confirm("Privacy check found possible sensitive content in this " + action + ":\n\n" + list + "\n\nExport anyway?");
+      if (!allowed) setStatus("Export cancelled after privacy check.", true);
+      return allowed;
     }
 
     function markUpdated() {
@@ -3248,6 +3444,10 @@ const POSITIONS = {
       const prevStudies = value("previous_studies");
       const newStudies = value("new_studies");
       if (prevStudies !== null && newStudies !== null) fill("total_studies", prevStudies + newStudies);
+      if (changed.length) {
+        beginHistory();
+        queueHistoryCommit();
+      }
       renderEditor();
       renderLabelEditor();
       renderBulkTable();
@@ -3274,7 +3474,30 @@ const POSITIONS = {
       target.classList.add("field-flash");
     }
 
+    const STEP_PROGRESS_FIELDS = Object.freeze({
+      identification: ["previous_studies", "previous_reports", "database_results", "database_specific_results", "register_results", "register_specific_results", "website_results", "organisation_results", "citations_results"],
+      screening: ["duplicates", "excluded_automatic", "excluded_other", "records_screened", "records_excluded"],
+      eligibility: ["dbr_sought_reports", "dbr_notretrieved_reports", "dbr_assessed", "dbr_excluded", "other_sought_reports", "other_notretrieved_reports", "other_assessed", "other_excluded"],
+      included: ["new_studies", "new_reports", "total_studies", "total_reports", "total_studies_ma", "total_reports_ma"]
+    });
+
+    function updateStepProgress() {
+      for (const [section, fieldIds] of Object.entries(STEP_PROGRESS_FIELDS)) {
+        const badge = sectionNav?.querySelector("[data-step-progress=\"" + section + "\"]");
+        const button = badge?.closest("[data-section]");
+        if (!badge || !button) continue;
+        const complete = fieldIds.filter((id) => {
+          const value = String(rowById(id)?.n ?? "").trim();
+          return value !== "" && value !== "0" && value !== "NA" && !/xxx/i.test(value);
+        }).length;
+        badge.textContent = complete + "/" + fieldIds.length;
+        badge.title = complete + " of " + fieldIds.length + " fields populated";
+        button.classList.toggle("step-complete", complete === fieldIds.length);
+      }
+    }
+
     function updateStats() {
+      updateStepProgress();
       const valueCount = rows.filter((row) => row.n !== "" && row.n !== "0").length;
       const visibleArms = [settings.showPrevious ? "previous" : "", settings.showDatabases ? "databases" : "", settings.showOther ? "other methods" : ""].filter(Boolean).join(" + ");
       stats.textContent = `${rows.length + 1} CSV rows loaded | ${valueCount} populated fields | ${visibleArms || "main arm only"}`;
@@ -3290,7 +3513,9 @@ const POSITIONS = {
       const index = Number(target.dataset.rowIndex);
       const column = target.dataset.column;
       if (!Number.isInteger(index) || !rows[index] || !column) return;
+      beginHistory();
       rows[index][column] = target.value;
+      queueHistoryCommit();
       const fieldStatus = target.closest(".field")?.querySelector(".field-status");
       if (fieldStatus && column === "n" && target.type === "number") {
         const invalid = target.value.trim() !== "" && numeric(target.value) === null;
@@ -3408,7 +3633,9 @@ editorFields.addEventListener("input", (event) => {
           url: "NA",
           n: "",
         };
+        beginHistory();
         rows.splice(index + 1, 0, newRow);
+        queueHistoryCommit();
         renderEditor();
         renderBulkTable();
         renderVisibilityPanel();
@@ -3422,31 +3649,41 @@ editorFields.addEventListener("input", (event) => {
     });
 
     document.getElementById("diagramTitle").addEventListener("input", (event) => {
+      beginHistory();
       settings.title = event.target.value;
+      queueHistoryCommit();
       renderDiagram();
     });
 
     document.getElementById("diagramNote").addEventListener("input", (event) => {
+      beginHistory();
       settings.note = event.target.value;
+      queueHistoryCommit();
       renderDiagram();
     });
 
     document.getElementById("showPrevious").addEventListener("change", (event) => {
+      beginHistory();
       settings.showPrevious = event.target.checked;
+      queueHistoryCommit();
       renderDiagram();
       syncVisibilityControls();
       setStatus(settings.showPrevious ? "Previous studies arm shown." : "Previous studies arm hidden.");
     });
 
     document.getElementById("showOther").addEventListener("change", (event) => {
+      beginHistory();
       settings.showOther = event.target.checked;
+      queueHistoryCommit();
       renderDiagram();
       syncVisibilityControls();
       setStatus(settings.showOther ? "Other methods arm shown." : "Other methods arm hidden.");
     });
 
     document.getElementById("showDatabases").addEventListener("change", (event) => {
+      beginHistory();
       settings.showDatabases = event.target.checked;
+      queueHistoryCommit();
       renderDiagram();
       syncVisibilityControls();
       setStatus(settings.showDatabases
@@ -3457,6 +3694,8 @@ editorFields.addEventListener("input", (event) => {
     document.getElementById("visibilityGroups").addEventListener("change", (event) => {
       const target = event.target;
       if (!(target instanceof HTMLInputElement)) return;
+      beginHistory();
+      queueHistoryCommit();
       if (target.id.startsWith("vis-master-")) {
         const group = VISIBILITY_GROUPS.find((g) => `vis-master-${g.column}` === target.id);
         if (!group || !group.master) return;
@@ -3500,6 +3739,7 @@ editorFields.addEventListener("input", (event) => {
     });
 
     document.getElementById("showAllVisibilityButton").addEventListener("click", () => {
+      beginHistory();
       settings.showPrevious = true;
       settings.showDatabases = true;
       settings.showOther = true;
@@ -3511,21 +3751,31 @@ editorFields.addEventListener("input", (event) => {
     });
 
     document.getElementById("downloadCsv").addEventListener("click", () => {
+      if (!privacyGuard("CSV export")) return;
       downloadBlob("PRISMA_2020_edited.csv", rowsToCSV(), "text/csv;charset=utf-8");
       setStatus("CSV exported with the original 35 x 8 schema.");
     });
 
     document.getElementById("downloadSvg").addEventListener("click", () => {
+      if (!privacyGuard("SVG export")) return;
       downloadBlob("PRISMA_2020_Flow_Diagram.svg", svgForDownload(), "image/svg+xml;charset=utf-8");
       setStatus("SVG diagram exported.");
     });
 
     document.getElementById("downloadPng").addEventListener("click", () => {
+      if (!privacyGuard("PNG export")) return;
       downloadPNG();
       setStatus("Preparing high-resolution PNG export...");
     });
 
-    document.getElementById("printButton").addEventListener("click", () => window.print());
+    document.getElementById("printButton").addEventListener("click", () => {
+      if (privacyGuard("print")) window.print();
+    });
+    document.getElementById("exportBundleQuick")?.addEventListener("click", () => exportCurrentProjectBundle());
+    document.getElementById("privacyCheckButton")?.addEventListener("click", () => {
+      const findings = privacyFindings();
+      setStatus(findings.length ? "Privacy check found: " + findings.join(", ") + "." : "Privacy check passed. No obvious sensitive patterns found.", findings.length > 0);
+    });
 
     document.getElementById("fullscreenButton").addEventListener("click", openFullscreen);
     document.getElementById("fullscreenClose").addEventListener("click", closeFullscreen);
@@ -3543,6 +3793,11 @@ editorFields.addEventListener("input", (event) => {
       const button = event.target.closest?.("[data-section]");
       if (button) showEditorSection(button.dataset.section);
     });
+    document.getElementById("undoButton")?.addEventListener("click", undoEdit);
+    document.getElementById("redoButton")?.addEventListener("click", redoEdit);
+
+    document.getElementById("startReviewButton")?.addEventListener("click", () => showEditorSection("identification"));
+    document.getElementById("startImportButton")?.addEventListener("click", () => document.getElementById("csvInput")?.click());
 
     checkList.addEventListener("click", (event) => {
       const target = event.target.closest?.("[data-focus-id]");
@@ -3553,22 +3808,66 @@ editorFields.addEventListener("input", (event) => {
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !fullscreenOverlay.hidden) closeFullscreen();
+      if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (key === "z") {
+        event.preventDefault();
+        event.shiftKey ? redoEdit() : undoEdit();
+      } else if (key === "y") {
+        event.preventDefault();
+        redoEdit();
+      }
     });
 
     document.getElementById("autoFillButton").addEventListener("click", autoFillDerived);
+
+    let pendingCsvImport = null;
+    const importPreviewDialog = document.getElementById("importPreviewDialog");
+    const importPreviewSummary = document.getElementById("importPreviewSummary");
+
+    function showImportPreview(file, importedRows) {
+      pendingCsvImport = { fileName: file.name, rows: importedRows };
+      const populated = importedRows.filter((row) => String(row.n ?? "").trim() !== "" && String(row.n ?? "").trim() !== "0").length;
+      const numeric = importedRows.filter((row) => /^\d+$/.test(String(row.n ?? "").trim())).length;
+      if (importPreviewSummary) {
+        importPreviewSummary.innerHTML = "<strong>" + escapeHtml(file.name) + "</strong><br>" + importedRows.length + " schema rows detected · " + populated + " populated values · " + numeric + " numeric values<br>Current project data will be replaced only after confirmation.";
+      }
+      if (importPreviewDialog?.showModal) importPreviewDialog.showModal();
+      else if (importPreviewDialog) importPreviewDialog.setAttribute("open", "");
+    }
+
+    function applyPendingCsvImport() {
+      if (!pendingCsvImport) return;
+      beginHistory();
+      rows = pendingCsvImport.rows;
+      queueHistoryCommit();
+      renderEditor();
+      renderLabelEditor();
+      renderBulkTable();
+      renderVisibilityPanel();
+      renderDiagram();
+      setStatus(pendingCsvImport.fileName + " imported successfully. The 35 x 8 schema is valid.");
+      pendingCsvImport = null;
+      if (importPreviewDialog?.close) importPreviewDialog.close();
+      else importPreviewDialog?.removeAttribute("open");
+    }
+
+    document.getElementById("importPreviewConfirm")?.addEventListener("click", applyPendingCsvImport);
+    const cancelCsvImport = () => {
+      pendingCsvImport = null;
+      importPreviewDialog?.close?.();
+      importPreviewDialog?.removeAttribute("open");
+      setStatus("CSV import cancelled.");
+    };
+    document.getElementById("importPreviewCancel")?.addEventListener("click", cancelCsvImport);
+    document.getElementById("importPreviewCancel2")?.addEventListener("click", cancelCsvImport);
 
     document.getElementById("csvInput").addEventListener("change", async (event) => {
       const file = event.target.files?.[0];
       if (!file) return;
       try {
         const importedRows = rowsFromCSV(await file.text());
-        rows = importedRows;
-        renderEditor();
-        renderLabelEditor();
-        renderBulkTable();
-        renderVisibilityPanel();
-        renderDiagram();
-        setStatus(`${file.name} imported successfully. The 35 x 8 schema is valid.`);
+        showImportPreview(file, importedRows);
       } catch (error) {
         setStatus(error.message || "The CSV could not be imported.", true);
       } finally {
@@ -3579,6 +3878,7 @@ editorFields.addEventListener("input", (event) => {
     const resetButton = document.getElementById("resetButton");
     resetButton.addEventListener("click", () => {
       if (!window.confirm("Reset current project’s data to the clean template values?\n\nThis keeps the project name/metadata but clears numbers and visibility for this project.")) return;
+      beginHistory();
       const cur = getCurrentProject();
       if (cur) {
         cur.rows = cloneRows(DEFAULT_ROWS);
@@ -3607,6 +3907,8 @@ editorFields.addEventListener("input", (event) => {
     syncSettingsControls();
     renderDiagram();
     renderZoom();
+    resetHistoryBaseline();
+    updateHistoryUI();
     updateCheckpointUI();
     updateProjectUI();
     setStatus(`Project “${getCurrentProject()?.name||"—"}” ready. ${getProjects().length} project${getProjects().length===1?"":"s"} in this browser.`);
@@ -3724,6 +4026,7 @@ editorFields.addEventListener("input", (event) => {
         const el=document.getElementById(id);
         if(!el) return;
         el.addEventListener("input", ()=>{
+          beginHistory();
           clearTimeout(metaTimer);
           metaTimer=setTimeout(()=>{ updateProjectMetaFromUI(); renderProjectsDashboard(); }, 600);
         });
@@ -4040,6 +4343,9 @@ editorFields.addEventListener("input", (event) => {
     } catch(_){}
 
     // actions
+    cmds.push({ id:"undo-edit", label:"Undo last edit", hint:"Ctrl/Cmd + Z", action:()=> undoEdit(), keys:"u" });
+    cmds.push({ id:"redo-edit", label:"Redo last edit", hint:"Ctrl/Cmd + Shift + Z", action:()=> redoEdit(), keys:"r" });
+    cmds.push({ id:"privacy-check", label:"Run privacy check", hint:"Scan current project", action:()=> document.getElementById("privacyCheckButton")?.click() });
     cmds.push({ id:"export-csv", label:"Export CSV", hint:"PRISMA_2020_edited.csv", action:()=> document.getElementById("downloadCsv")?.click(), keys:"e c" });
     cmds.push({ id:"export-svg", label:"Download SVG", hint:"Vector diagram", action:()=> document.getElementById("downloadSvg")?.click(), keys:"e s" });
     cmds.push({ id:"export-png", label:"Download PNG", hint:"3× large text", action:()=> document.getElementById("downloadPng")?.click(), keys:"e p" });
@@ -4680,3 +4986,4 @@ editorFields.addEventListener("input", (event) => {
 </script>
 </body>
 </html>
+
