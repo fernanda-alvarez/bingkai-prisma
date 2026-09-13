@@ -1180,6 +1180,43 @@ body .badge__dot,
 body .diagram-badge,
 body [style*="border-radius:50%"]{border-radius:50%!important}
 #cmdPaletteOverlay *,#checkpointDialog,#tsvDialog{border-radius:0!important}
+/* Start here / hierarchy */
+.start-card{
+  margin:0 0 18px;
+  padding:16px;
+  border:1px solid #b9cddb;
+  border-left:4px solid var(--blue);
+  background:#f1f8fc;
+}
+.start-card__eyebrow{
+  margin-bottom:5px;
+  color:var(--blue);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.start-card h3{
+  margin-bottom:6px;
+  font-size:16px;
+  letter-spacing:-.025em;
+}
+.start-card p{
+  max-width:58ch;
+  margin-bottom:12px;
+  color:var(--muted);
+  font-size:13px;
+}
+#resetButton{
+  color:#9b3d2c;
+  border-color:#e8c4bc;
+  background:#fffaf8;
+}
+#resetButton:hover{
+  color:#8a3022;
+  border-color:#d85c42;
+  background:#fff0ec;
+}
   </style>
 </head>
 <body>
@@ -1201,7 +1238,7 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
           <span style="width:7px;height:7px;border-radius:50%;background:#36a274;display:inline-block;"></span>
           <span style="font-size:11px;">Local · Offline</span>
         </div>
-        <button id="openProjectsButton" class="secondary small" type="button" style="display:inline-flex;align-items:center;gap:8px;font-weight:800">
+        <button id="openProjectsButton" class="secondary small" type="button" aria-label="Open current project switcher" style="display:inline-flex;align-items:center;gap:8px;font-weight:800">
           <span style="width:8px;height:8px;border-radius:50%;background:#36a274;display:inline-block;flex:0 0 auto"></span>
           <span id="toolbarProjectLabel">Projects</span>
           <span id="toolbarProjectCount" class="badge badge--soft" style="padding:2px 6px;">0</span>
@@ -1221,7 +1258,10 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
 
     <div class="toolbar" style="position:relative;z-index:10;overflow:visible;">
       <div class="toolbar__status">
+        <div class="toolbar__status">
         <div id="status" class="status" role="status">Ready with the edited workbook values.</div>
+        <div class="toolbar__hint">Changes stay local and save automatically.</div>
+      </div>
         <div class="toolbar__hint">Changes stay local and save automatically.</div>
       </div>
       <div class="toolbar-actions" style="align-items:center;">
@@ -1261,7 +1301,7 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
           <h2>Edit workflow</h2>
           <p>Guided 4-step flow — plus tools.</p>
         </div>
-        <button type="button" data-section="projects">Projects <span class="nav-count" id="navProjectsCount"></span></button>
+        <button type="button" data-section="projects">Project library <span class="nav-count" id="navProjectsCount"></span></button>
         <button type="button" data-section="settings" aria-current="step">Settings</button>
         <p class="section-nav__label">Review flow</p>
         <button type="button" data-section="identification">① Identification <span class="nav-count">3</span></button>
@@ -1283,6 +1323,15 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
               <p>Display settings — kept in this browser tab. <span class="badge badge--soft" style="font-size:10px;">Auto-saved</span></p>
             </div>
           </div>
+          <div class="start-card" role="region" aria-labelledby="startReviewTitle">
+            <div class="start-card__eyebrow">Start here</div>
+            <h3 id="startReviewTitle">Build your PRISMA diagram</h3>
+            <p>Work from left to right: add identification counts, then screening, eligibility, and included studies. Your edits remain in this browser.</p>
+            <div class="action-row">
+              <button id="startReviewButton" class="small" type="button">Open Identification</button>
+              <button id="startImportButton" class="secondary small" type="button">Import CSV</button>
+            </div>
+          </div>
           <div class="field-stack">
             <div class="field">
               <label for="diagramTitle">Preview heading</label>
@@ -1298,7 +1347,7 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
               <label class="toggle"><input id="showOther" type="checkbox" checked><span>Show identification via other methods</span></label>
             </div>
             <div class="editor-group" style="border-top:1px solid #e6edf1;padding-top:12px;margin-top:2px;">
-              <h3>Project <span id="projectCount"></span></h3>
+              <h3>Project details <span id="projectCount"></span></h3>
               <p class="helper" style="margin:0 0 8px;">Name and IDs travel with the project bundle and appear in the caption/sign-off.</p>
               <div class="field-stack">
                 <div class="field"><label for="projectNameInput">Project name</label><input id="projectNameInput" type="text" autocomplete="off" placeholder="New review — clean template"></div>
@@ -1335,7 +1384,7 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
         <section class="panel-card" data-editor-section="projects" hidden>
           <div class="section-heading">
             <div>
-              <h2>Projects</h2>
+              <h2>Project library</h2>
               <p>Switch between PRISMA reviews. Projects live in this browser (<span id="projectCount2"></span>); <em>Export bundle</em> creates a filesystem copy (JSON with CSV).</p>
             </div>
           </div>
