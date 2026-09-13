@@ -886,3 +886,40 @@ body .badge__dot,
 body .diagram-badge,
 body [style*="border-radius:50%"]{border-radius:50%!important}
 #cmdPaletteOverlay *,#checkpointDialog,#tsvDialog{border-radius:0!important}
+/* Start here / hierarchy */
+.start-card{
+  margin:0 0 18px;
+  padding:16px;
+  border:1px solid #b9cddb;
+  border-left:4px solid var(--blue);
+  background:#f1f8fc;
+}
+.start-card__eyebrow{
+  margin-bottom:5px;
+  color:var(--blue);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.start-card h3{
+  margin-bottom:6px;
+  font-size:16px;
+  letter-spacing:-.025em;
+}
+.start-card p{
+  max-width:58ch;
+  margin-bottom:12px;
+  color:var(--muted);
+  font-size:13px;
+}
+#resetButton{
+  color:#9b3d2c;
+  border-color:#e8c4bc;
+  background:#fffaf8;
+}
+#resetButton:hover{
+  color:#8a3022;
+  border-color:#d85c42;
+  background:#fff0ec;
+}
