@@ -583,6 +583,22 @@
       sectionNav?.querySelectorAll("[data-section]").forEach((button) => {
         button.setAttribute("aria-current", button.dataset.section === section ? "step" : "false");
       });
+      const mobileNames = {
+        settings: "Settings",
+        projects: "Project library",
+        identification: "Identification",
+        screening: "Screening",
+        eligibility: "Eligibility",
+        included: "Included",
+        checks: "Checks",
+        visibility: "Visibility",
+        advanced: "Advanced"
+      };
+      const mobileStepName = document.getElementById("mobileStepName");
+      if (mobileStepName) mobileStepName.textContent = mobileNames[section] || section;
+      if (window.matchMedia("(max-width: 980px)").matches) {
+        document.querySelector("[data-editor-section=\"" + section + "\"]")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }
 
     function renderLabelEditor() {
