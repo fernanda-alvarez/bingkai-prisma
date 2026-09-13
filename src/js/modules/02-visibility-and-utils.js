@@ -79,6 +79,101 @@
     }
 
     let saveTimer = null;
+    const HISTORY_LIMIT = 50;
+    let undoStack = [];
+    let redoStack = [];
+    let historyBefore = null;
+    let historyTimer = null;
+    let historyRestoring = false;
+
+    function historySnapshot() {
+      return { rows: cloneRows(rows), settings: JSON.parse(JSON.stringify(settings)) };
+    }
+
+    function historySignature(snapshot) { return JSON.stringify(snapshot); }
+
+    function beginHistory() {
+      if (historyRestoring || historyBefore) return;
+      historyBefore = historySnapshot();
+      window.clearTimeout(historyTimer);
+      historyTimer = null;
+    }
+
+    function commitHistory() {
+      if (!historyBefore) return;
+      const current = historySnapshot();
+      if (historySignature(historyBefore) !== historySignature(current)) {
+        undoStack.push(historyBefore);
+        if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+        redoStack = [];
+      }
+      historyBefore = null;
+      window.clearTimeout(historyTimer);
+      historyTimer = null;
+      updateHistoryUI();
+    }
+
+    function queueHistoryCommit() {
+      window.clearTimeout(historyTimer);
+      historyTimer = window.setTimeout(commitHistory, 500);
+    }
+
+    function resetHistoryBaseline() {
+      historyBefore = null;
+      undoStack = [];
+      redoStack = [];
+      window.clearTimeout(historyTimer);
+      historyTimer = null;
+      updateHistoryUI();
+    }
+
+    function updateHistoryUI() {
+      const undo = document.getElementById("undoButton");
+      const redo = document.getElementById("redoButton");
+      if (undo) {
+        undo.disabled = undoStack.length === 0;
+        undo.title = undo.disabled ? "Nothing to undo" : "Undo (" + undoStack.length + " available)";
+      }
+      if (redo) {
+        redo.disabled = redoStack.length === 0;
+        redo.title = redo.disabled ? "Nothing to redo" : "Redo (" + redoStack.length + " available)";
+      }
+    }
+
+    function applyHistorySnapshot(snapshot) {
+      historyRestoring = true;
+      rows = cloneRows(snapshot.rows);
+      settings = JSON.parse(JSON.stringify(snapshot.settings));
+      renderEditor();
+      renderLabelEditor();
+      renderBulkTable();
+      renderVisibilityPanel();
+      syncSettingsControls();
+      renderDiagram();
+      if (typeof updateProjectUI === "function") updateProjectUI();
+      historyRestoring = false;
+    }
+
+    function undoEdit() {
+      commitHistory();
+      if (!undoStack.length) return;
+      const current = historySnapshot();
+      redoStack.push(current);
+      applyHistorySnapshot(undoStack.pop());
+      updateHistoryUI();
+      setStatus("Undid the last edit.");
+    }
+
+    function redoEdit() {
+      commitHistory();
+      if (!redoStack.length) return;
+      const current = historySnapshot();
+      undoStack.push(current);
+      applyHistorySnapshot(redoStack.pop());
+      updateHistoryUI();
+      setStatus("Redid the last edit.");
+    }
+
     function scheduleSave() {
       window.clearTimeout(saveTimer);
       saveTimer = window.setTimeout(() => {
@@ -299,6 +394,40 @@
     function setStatus(message, isError = false) {
       status.textContent = message;
       status.classList.toggle("error", isError);
+    }
+
+    function privacyFindings() {
+      const cur = typeof getCurrentProject === "function" ? getCurrentProject() : null;
+      const corpus = [
+        rowsToCSV(), settings?.title || "", settings?.note || "", cur?.name || "",
+        cur?.meta?.reviewTitle || "", cur?.meta?.prosperoId || "", cur?.meta?.reviewId || "", cur?.meta?.notes || ""
+      ].join("\n");
+      const rules = [
+        { label: "email address", re: /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/ig },
+        { label: "local file path", re: /(?:[A-Z]:\\|\\\\[^\s]+|\/Users\/|\/home\/)/g },
+        { label: "private key or access token", re: /-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:ghp_|github_pat_|sk-[A-Za-z0-9])[A-Za-z0-9_-]*/g },
+        { label: "password or API key pattern", re: /\b(?:password|passwd|api[_-]?key|secret)\s*[:=]/ig },
+        { label: "review identifier", re: /\b(?:CRD\d{6,}|PROSPERO|REVIEW[-_][A-Z0-9-]+)\b/ig },
+        { label: "possible participant/patient data", re: /\b(?:patient|participant|date of birth|address|phone number)\b/ig }
+      ];
+      const findings = [];
+      for (const rule of rules) {
+        if (rule.re.test(corpus)) findings.push(rule.label);
+        rule.re.lastIndex = 0;
+      }
+      return [...new Set(findings)];
+    }
+
+    function privacyGuard(action = "export") {
+      const findings = privacyFindings();
+      if (!findings.length) {
+        setStatus("Privacy check passed before " + action + ".");
+        return true;
+      }
+      const list = findings.map((item) => "• " + item).join("\n");
+      const allowed = window.confirm("Privacy check found possible sensitive content in this " + action + ":\n\n" + list + "\n\nExport anyway?");
+      if (!allowed) setStatus("Export cancelled after privacy check.", true);
+      return allowed;
     }
 
     function markUpdated() {
