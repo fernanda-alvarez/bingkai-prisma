@@ -40,7 +40,9 @@ editorFields.addEventListener("input", (event) => {
           url: "NA",
           n: "",
         };
+        beginHistory();
         rows.splice(index + 1, 0, newRow);
+        queueHistoryCommit();
         renderEditor();
         renderBulkTable();
         renderVisibilityPanel();
@@ -54,31 +56,41 @@ editorFields.addEventListener("input", (event) => {
     });
 
     document.getElementById("diagramTitle").addEventListener("input", (event) => {
+      beginHistory();
       settings.title = event.target.value;
+      queueHistoryCommit();
       renderDiagram();
     });
 
     document.getElementById("diagramNote").addEventListener("input", (event) => {
+      beginHistory();
       settings.note = event.target.value;
+      queueHistoryCommit();
       renderDiagram();
     });
 
     document.getElementById("showPrevious").addEventListener("change", (event) => {
+      beginHistory();
       settings.showPrevious = event.target.checked;
+      queueHistoryCommit();
       renderDiagram();
       syncVisibilityControls();
       setStatus(settings.showPrevious ? "Previous studies arm shown." : "Previous studies arm hidden.");
     });
 
     document.getElementById("showOther").addEventListener("change", (event) => {
+      beginHistory();
       settings.showOther = event.target.checked;
+      queueHistoryCommit();
       renderDiagram();
       syncVisibilityControls();
       setStatus(settings.showOther ? "Other methods arm shown." : "Other methods arm hidden.");
     });
 
     document.getElementById("showDatabases").addEventListener("change", (event) => {
+      beginHistory();
       settings.showDatabases = event.target.checked;
+      queueHistoryCommit();
       renderDiagram();
       syncVisibilityControls();
       setStatus(settings.showDatabases
@@ -89,6 +101,8 @@ editorFields.addEventListener("input", (event) => {
     document.getElementById("visibilityGroups").addEventListener("change", (event) => {
       const target = event.target;
       if (!(target instanceof HTMLInputElement)) return;
+      beginHistory();
+      queueHistoryCommit();
       if (target.id.startsWith("vis-master-")) {
         const group = VISIBILITY_GROUPS.find((g) => `vis-master-${g.column}` === target.id);
         if (!group || !group.master) return;
@@ -132,6 +146,7 @@ editorFields.addEventListener("input", (event) => {
     });
 
     document.getElementById("showAllVisibilityButton").addEventListener("click", () => {
+      beginHistory();
       settings.showPrevious = true;
       settings.showDatabases = true;
       settings.showOther = true;
@@ -143,21 +158,31 @@ editorFields.addEventListener("input", (event) => {
     });
 
     document.getElementById("downloadCsv").addEventListener("click", () => {
+      if (!privacyGuard("CSV export")) return;
       downloadBlob("PRISMA_2020_edited.csv", rowsToCSV(), "text/csv;charset=utf-8");
       setStatus("CSV exported with the original 35 x 8 schema.");
     });
 
     document.getElementById("downloadSvg").addEventListener("click", () => {
+      if (!privacyGuard("SVG export")) return;
       downloadBlob("PRISMA_2020_Flow_Diagram.svg", svgForDownload(), "image/svg+xml;charset=utf-8");
       setStatus("SVG diagram exported.");
     });
 
     document.getElementById("downloadPng").addEventListener("click", () => {
+      if (!privacyGuard("PNG export")) return;
       downloadPNG();
       setStatus("Preparing high-resolution PNG export...");
     });
 
-    document.getElementById("printButton").addEventListener("click", () => window.print());
+    document.getElementById("printButton").addEventListener("click", () => {
+      if (privacyGuard("print")) window.print();
+    });
+    document.getElementById("exportBundleQuick")?.addEventListener("click", () => exportCurrentProjectBundle());
+    document.getElementById("privacyCheckButton")?.addEventListener("click", () => {
+      const findings = privacyFindings();
+      setStatus(findings.length ? "Privacy check found: " + findings.join(", ") + "." : "Privacy check passed. No obvious sensitive patterns found.", findings.length > 0);
+    });
 
     document.getElementById("fullscreenButton").addEventListener("click", openFullscreen);
     document.getElementById("fullscreenClose").addEventListener("click", closeFullscreen);
@@ -175,6 +200,8 @@ editorFields.addEventListener("input", (event) => {
       const button = event.target.closest?.("[data-section]");
       if (button) showEditorSection(button.dataset.section);
     });
+    document.getElementById("undoButton")?.addEventListener("click", undoEdit);
+    document.getElementById("redoButton")?.addEventListener("click", redoEdit);
 
     document.getElementById("startReviewButton")?.addEventListener("click", () => showEditorSection("identification"));
     document.getElementById("startImportButton")?.addEventListener("click", () => document.getElementById("csvInput")?.click());
@@ -188,22 +215,66 @@ editorFields.addEventListener("input", (event) => {
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !fullscreenOverlay.hidden) closeFullscreen();
+      if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (key === "z") {
+        event.preventDefault();
+        event.shiftKey ? redoEdit() : undoEdit();
+      } else if (key === "y") {
+        event.preventDefault();
+        redoEdit();
+      }
     });
 
     document.getElementById("autoFillButton").addEventListener("click", autoFillDerived);
+
+    let pendingCsvImport = null;
+    const importPreviewDialog = document.getElementById("importPreviewDialog");
+    const importPreviewSummary = document.getElementById("importPreviewSummary");
+
+    function showImportPreview(file, importedRows) {
+      pendingCsvImport = { fileName: file.name, rows: importedRows };
+      const populated = importedRows.filter((row) => String(row.n ?? "").trim() !== "" && String(row.n ?? "").trim() !== "0").length;
+      const numeric = importedRows.filter((row) => /^\d+$/.test(String(row.n ?? "").trim())).length;
+      if (importPreviewSummary) {
+        importPreviewSummary.innerHTML = "<strong>" + escapeHtml(file.name) + "</strong><br>" + importedRows.length + " schema rows detected · " + populated + " populated values · " + numeric + " numeric values<br>Current project data will be replaced only after confirmation.";
+      }
+      if (importPreviewDialog?.showModal) importPreviewDialog.showModal();
+      else if (importPreviewDialog) importPreviewDialog.setAttribute("open", "");
+    }
+
+    function applyPendingCsvImport() {
+      if (!pendingCsvImport) return;
+      beginHistory();
+      rows = pendingCsvImport.rows;
+      queueHistoryCommit();
+      renderEditor();
+      renderLabelEditor();
+      renderBulkTable();
+      renderVisibilityPanel();
+      renderDiagram();
+      setStatus(pendingCsvImport.fileName + " imported successfully. The 35 x 8 schema is valid.");
+      pendingCsvImport = null;
+      if (importPreviewDialog?.close) importPreviewDialog.close();
+      else importPreviewDialog?.removeAttribute("open");
+    }
+
+    document.getElementById("importPreviewConfirm")?.addEventListener("click", applyPendingCsvImport);
+    const cancelCsvImport = () => {
+      pendingCsvImport = null;
+      importPreviewDialog?.close?.();
+      importPreviewDialog?.removeAttribute("open");
+      setStatus("CSV import cancelled.");
+    };
+    document.getElementById("importPreviewCancel")?.addEventListener("click", cancelCsvImport);
+    document.getElementById("importPreviewCancel2")?.addEventListener("click", cancelCsvImport);
 
     document.getElementById("csvInput").addEventListener("change", async (event) => {
       const file = event.target.files?.[0];
       if (!file) return;
       try {
         const importedRows = rowsFromCSV(await file.text());
-        rows = importedRows;
-        renderEditor();
-        renderLabelEditor();
-        renderBulkTable();
-        renderVisibilityPanel();
-        renderDiagram();
-        setStatus(`${file.name} imported successfully. The 35 x 8 schema is valid.`);
+        showImportPreview(file, importedRows);
       } catch (error) {
         setStatus(error.message || "The CSV could not be imported.", true);
       } finally {
@@ -214,6 +285,7 @@ editorFields.addEventListener("input", (event) => {
     const resetButton = document.getElementById("resetButton");
     resetButton.addEventListener("click", () => {
       if (!window.confirm("Reset current project’s data to the clean template values?\n\nThis keeps the project name/metadata but clears numbers and visibility for this project.")) return;
+      beginHistory();
       const cur = getCurrentProject();
       if (cur) {
         cur.rows = cloneRows(DEFAULT_ROWS);
@@ -242,6 +314,8 @@ editorFields.addEventListener("input", (event) => {
     syncSettingsControls();
     renderDiagram();
     renderZoom();
+    resetHistoryBaseline();
+    updateHistoryUI();
     updateCheckpointUI();
     updateProjectUI();
     setStatus(`Project “${getCurrentProject()?.name||"—"}” ready. ${getProjects().length} project${getProjects().length===1?"":"s"} in this browser.`);
@@ -359,6 +433,7 @@ editorFields.addEventListener("input", (event) => {
         const el=document.getElementById(id);
         if(!el) return;
         el.addEventListener("input", ()=>{
+          beginHistory();
           clearTimeout(metaTimer);
           metaTimer=setTimeout(()=>{ updateProjectMetaFromUI(); renderProjectsDashboard(); }, 600);
         });
