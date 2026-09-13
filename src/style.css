@@ -923,3 +923,63 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
   border-color:#d85c42;
   background:#fff0ec;
 }
+/* Adaptive workspace */
+.workspace{container-type:inline-size;container-name:prisma-workspace;min-width:0}
+.workspace > *,.editor-panel,.preview-panel,.preview-head,.preview-actions,.toolbar-actions{min-width:0}
+.preview-panel{overflow:hidden}
+.preview-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.preview-actions{display:flex;align-items:center}
+.history-controls{display:flex;gap:6px;align-items:center;flex:0 0 auto}
+.history-controls button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.step-complete .nav-count{background:var(--green-soft);color:#1a6b4a;border-color:#bfe0cc}
+.import-preview-summary{padding:12px;border:1px solid var(--line);border-left:4px solid var(--blue);background:#f7fbfd;line-height:1.55}
+.import-preview-summary strong{color:var(--blue-dark)}
+@container prisma-workspace (max-width:1350px){
+  .workspace{grid-template-columns:190px minmax(0,1fr);grid-template-areas:"nav preview" "nav editor";align-items:start}
+  .section-nav{grid-area:nav;position:sticky;top:16px}
+  .preview-panel{grid-area:preview;min-height:520px}
+  .editor-panel{grid-area:editor;max-height:none}
+  .svg-viewport{min-height:520px}
+  .toolbar-actions{justify-content:flex-start}
+}
+@container prisma-workspace (max-width:980px){
+  .workspace{display:flex;flex-direction:column;gap:14px}
+  .section-nav{order:1;position:static;width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch}
+  .section-nav > div:first-child,.section-nav__label,.nav-foot{grid-column:1 / -1}
+  .preview-panel{order:2;width:100%;min-height:0}
+  .editor-panel{order:3;width:100%;max-height:none;overflow:visible}
+  .preview-head{align-items:stretch;flex-direction:column;gap:10px}
+  .preview-actions{justify-content:flex-start;flex-wrap:wrap}
+  .toolbar{align-items:flex-start;flex-wrap:wrap}
+  .toolbar__status{flex:1 1 260px}
+  .history-controls{order:2}
+  .toolbar-actions{order:3;width:100%;justify-content:flex-start}
+  .svg-viewport{min-height:440px}
+}
+@container prisma-workspace (max-width:680px){
+  .section-nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .section-nav button{min-height:42px;text-align:left}
+  .toolbar-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .toolbar-actions > *{min-width:0}
+  .export-group{display:contents}
+  .toolbar-actions .split-button,.toolbar-actions .split-button > button{width:100%}
+  .history-controls{width:100%;order:2}
+  .history-controls button{flex:1}
+  .preview-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .preview-actions > *{width:100%}
+  .zoom-controls{grid-column:1 / -1;display:flex;justify-content:center}
+  .svg-viewport{min-height:360px;padding:8px;overflow:auto}
+  .diagram-svg{min-width:680px!important;max-width:none}
+  .start-card{padding:14px}
+}
+@container prisma-workspace (max-width:460px){
+  .app-shell{width:calc(100% - 20px);padding-top:10px}
+  .topbar__brand{width:100%}
+  .topbar__subtitle{white-space:normal;max-width:100%}
+  .topbar > div:last-child{width:100%;justify-content:flex-start!important}
+  .toolbar-actions{display:flex;flex-direction:column;align-items:stretch}
+  .toolbar-actions > *,.toolbar-actions .split-button,.toolbar-actions .split-button > button{width:100%}
+  .preview-actions{display:flex;flex-direction:column;align-items:stretch}
+  .preview-actions > *,.preview-actions .zoom-controls{width:100%}
+  .panel-card{padding:14px}
+}
