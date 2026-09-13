@@ -182,6 +182,17 @@ const POSITIONS = {
       return `<path class="connector" d="M ${startX} ${y} H ${endX}" marker-end="url(#arrow)"></path>`;
     }
 
+    function eligibilityBendY() {
+      // Route the other-method arm below every box in the eligibility row.
+      // This prevents the elbow from overlapping the database/register arm.
+      const keys = ["assessed", "databaseExcluded", "otherAssessed", "otherExcluded"];
+      const bottoms = keys.filter(boxVisible).map((key) => {
+        const position = positionFor(key);
+        return bottomY(position, boxHeightForPosition(key));
+      });
+      return bottoms.length ? Math.max(...bottoms) + 22 : null;
+    }
+
     // Bypass arrow for a chain pair whose intermediate boxes are hidden:
     // vertical when the boxes share a column, otherwise an elbow.
     function spineArrow(aKey, bKey) {
@@ -196,7 +207,7 @@ const POSITIONS = {
       let bend = (aKey === "prevBox" || aKey === "prevTitle")
         ? (layoutInfo ? layoutInfo.prevBend : 1060) // prev arm elbows below the database arm
         : (aKey === "otherAssessed" || aKey === "otherSought" || aKey === "otherBox")
-          ? bottomY(a, boxHeightForPosition(aKey)) + 14
+          ? (eligibilityBendY() ?? bottomY(a, boxHeightForPosition(aKey)) + 14)
           : startY + 22;
       if (bend >= endY - 6) bend = (startY + endY) / 2;
       return arrowPath(startX, startY, endX, endY, bend);
@@ -256,7 +267,7 @@ const POSITIONS = {
         { refs: ["otherAssessed", "newIncluded"], chain: otherChain,
           d: arrowPath(centerX(p("otherAssessed")), bottomY(p("otherAssessed"), h("otherAssessed")),
                        centerX(p("newIncluded")), p("newIncluded").y,
-                       bottomY(p("otherAssessed"), h("otherAssessed")) + 14) },
+                       eligibilityBendY()) },
       ];
 
       // Side arrows (into removal boxes) only stay when both endpoints are
