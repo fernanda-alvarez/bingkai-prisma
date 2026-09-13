@@ -22,7 +22,7 @@
   }
   </script>
   <title>Bingkai Prisma — PRISMA 2020 Workbench</title>
-  <!-- built 2026-09-13 08:24:26 from src/ -->
+  <!-- built 2026-09-13 08:28:46 from src/ -->
   <style>
 /* tokens.css — Pro design tokens (keeps your blue/grey/yellow palette, refined) */
 :root{
@@ -1275,6 +1275,39 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
   .preview-actions{display:flex;flex-direction:column;align-items:stretch}
   .preview-actions > *,.preview-actions .zoom-controls{width:100%}
   .panel-card{padding:14px}
+}/* Adaptive workflow extras */
+.diagram-svg .flow-node.is-selected text{
+  fill:var(--blue-dark);
+  font-weight:800;
+}
+.mobile-action-bar{display:none}
+@container prisma-workspace (max-width:680px){
+  .workspace{padding-bottom:76px}
+  .mobile-action-bar{
+    display:flex;
+    position:fixed;
+    left:12px;
+    right:12px;
+    bottom:12px;
+    z-index:100;
+    align-items:center;
+    gap:8px;
+    padding:8px;
+    border:1px solid var(--blue-dark);
+    background:#fff;
+    box-shadow:0 10px 26px rgba(20,45,77,.16);
+  }
+  .mobile-action-bar__step{
+    min-width:0;
+    flex:1 1 auto;
+    overflow:hidden;
+    color:var(--blue-dark);
+    font-size:12px;
+    font-weight:800;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .mobile-action-bar button{flex:0 0 auto}
 }
   </style>
 </head>
@@ -1338,9 +1371,9 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
             <button id="exportSplitToggle" class="secondary small" type="button" aria-label="More export options" style="padding:7px 8px;">▾</button>
           </div>
           <div id="exportSplitMenu" class="prisma-card" hidden style="position:absolute;right:0;top:calc(100% + 8px);z-index:50;min-width:240px;padding:6px;display:grid;gap:4px;box-shadow:0 12px 32px rgba(28,55,77,0.16);max-width:calc(100vw - 24px);">
-          <button id="downloadCsv" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Export CSV <span class="helper">.csv</span></button>
-          <button id="downloadSvg" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Download SVG <span class="helper">vector</span></button>
-          <button id="downloadPng" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Download PNG <span class="helper">3× large text</span></button>
+          <button id="downloadCsv" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Export editable CSV <span class="helper">.csv</span></button>
+          <button id="downloadSvg" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Download publication SVG <span class="helper">vector</span></button>
+          <button id="downloadPng" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Download high-res PNG <span class="helper">3× large text</span></button>
           <label class="ghost small" style="justify-content:space-between;display:flex;width:100%;cursor:pointer;border:1px solid transparent;padding:7px 10px;">Import CSV <span class="helper">.csv</span><input id="csvInput" type="file" accept=".csv,text/csv" style="display:none"></label>
           <div style="height:1px;background:var(--line);margin:2px 0;"></div>
           <button id="printButton" class="ghost small" type="button" style="justify-content:space-between;display:flex;width:100%;">Print <span class="helper">⌘P</span></button>
@@ -1392,6 +1425,7 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
             <div class="action-row">
               <button id="startReviewButton" class="small" type="button">Open Identification</button>
               <button id="startImportButton" class="secondary small" type="button">Import CSV</button>
+              <button id="tryExampleButton" class="secondary small" type="button">Try demo data</button>
             </div>
           </div>
           <div class="field-stack">
@@ -1552,6 +1586,11 @@ body [style*="border-radius:50%"]{border-radius:50%!important}
         </div>
       </section>
     </main>
+      <div id="mobileActionBar" class="mobile-action-bar" aria-label="Quick actions">
+        <span id="mobileStepName" class="mobile-action-bar__step">Settings</span>
+        <button id="mobilePreviewButton" class="secondary small" type="button">Preview</button>
+        <button id="mobileExportButton" class="small" type="button">Export</button>
+      </div>
 
     <footer class="footer">
       Based on the PRISMA 2020 flow diagram structure. Reference: <a href="https://estech.shinyapps.io/prisma_flowdiagram/" target="_blank" rel="noreferrer">PRISMA Flow Diagram Shiny app</a>. · <span class="badge badge--muted">Pro Overhaul · Solo edition · v1.1</span> · <span>Created by <a href="https://github.com/fernanda-alvarez" target="_blank" rel="noreferrer">Fernanda Alvarez Pratama</a></span>
@@ -2823,6 +2862,22 @@ let EXPECTED_DATA_KEYS = null;
       sectionNav?.querySelectorAll("[data-section]").forEach((button) => {
         button.setAttribute("aria-current", button.dataset.section === section ? "step" : "false");
       });
+      const mobileNames = {
+        settings: "Settings",
+        projects: "Project library",
+        identification: "Identification",
+        screening: "Screening",
+        eligibility: "Eligibility",
+        included: "Included",
+        checks: "Checks",
+        visibility: "Visibility",
+        advanced: "Advanced"
+      };
+      const mobileStepName = document.getElementById("mobileStepName");
+      if (mobileStepName) mobileStepName.textContent = mobileNames[section] || section;
+      if (window.matchMedia("(max-width: 980px)").matches) {
+        document.querySelector("[data-editor-section=\"" + section + "\"]")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }
 
     function renderLabelEditor() {
@@ -3457,6 +3512,51 @@ const POSITIONS = {
         : "Auto-fill made no changes. Existing counts were preserved.");
     }
 
+    function loadExampleData() {
+      if (!window.confirm("Load synthetic demo data?\n\nThis is illustrative only and must be replaced before publication.")) return;
+      const demoValues = {
+        database_results: "1240",
+        database_specific_results: "PubMed, 540; Scopus, 420; Web of Science, 280",
+        register_results: "12",
+        register_specific_results: "PROSPERO, 12",
+        website_results: "6",
+        organisation_results: "0",
+        citations_results: "18",
+        duplicates: "210",
+        excluded_automatic: "0",
+        excluded_other: "0",
+        records_screened: "1042",
+        records_excluded: "900",
+        dbr_sought_reports: "142",
+        dbr_notretrieved_reports: "12",
+        dbr_assessed: "130",
+        dbr_excluded: "Wrong population, 70; Wrong design, 20; No outcome data, 10",
+        other_sought_reports: "24",
+        other_notretrieved_reports: "3",
+        other_assessed: "21",
+        other_excluded: "Wrong population, 12; Duplicate report, 3",
+        new_studies: "26",
+        new_reports: "31",
+        total_studies: "26",
+        total_reports: "31",
+        total_studies_ma: "20",
+        total_reports_ma: "24"
+      };
+      beginHistory();
+      for (const [id, value] of Object.entries(demoValues)) {
+        const row = rowById(id);
+        if (row) row.n = value;
+      }
+      queueHistoryCommit();
+      renderEditor();
+      renderLabelEditor();
+      renderBulkTable();
+      renderVisibilityPanel();
+      renderDiagram();
+      showEditorSection("identification");
+      setStatus("Synthetic demo data loaded. Replace it before publication.");
+    }
+
     function focusRow(index) {
       const row = rows[index];
       if (!row) return;
@@ -3506,6 +3606,9 @@ const POSITIONS = {
     function selectedRow(index) {
       const row = rows[index];
       if (!row) return;
+      diagram.querySelectorAll("[data-row-index]").forEach((node) => {
+        node.classList.toggle("is-selected", Number(node.dataset.rowIndex) === index);
+      });
       selectedInfo.innerHTML = `<strong>${escapeHtml(row.data === "NA" ? row.box : row.data)}</strong> | ${escapeHtml(row.description || row.boxtext)}${row.n !== "" ? ` | <strong>${escapeHtml(displayValue(row))}</strong>` : ""}`;
     }
 
@@ -3798,6 +3901,9 @@ editorFields.addEventListener("input", (event) => {
 
     document.getElementById("startReviewButton")?.addEventListener("click", () => showEditorSection("identification"));
     document.getElementById("startImportButton")?.addEventListener("click", () => document.getElementById("csvInput")?.click());
+    document.getElementById("tryExampleButton")?.addEventListener("click", loadExampleData);
+    document.getElementById("mobilePreviewButton")?.addEventListener("click", openFullscreen);
+    document.getElementById("mobileExportButton")?.addEventListener("click", () => document.getElementById("exportSplitMain")?.click());
 
     checkList.addEventListener("click", (event) => {
       const target = event.target.closest?.("[data-focus-id]");
