@@ -576,6 +576,51 @@ const POSITIONS = {
         : "Auto-fill made no changes. Existing counts were preserved.");
     }
 
+    function loadExampleData() {
+      if (!window.confirm("Load synthetic demo data?\n\nThis is illustrative only and must be replaced before publication.")) return;
+      const demoValues = {
+        database_results: "1240",
+        database_specific_results: "PubMed, 540; Scopus, 420; Web of Science, 280",
+        register_results: "12",
+        register_specific_results: "PROSPERO, 12",
+        website_results: "6",
+        organisation_results: "0",
+        citations_results: "18",
+        duplicates: "210",
+        excluded_automatic: "0",
+        excluded_other: "0",
+        records_screened: "1042",
+        records_excluded: "900",
+        dbr_sought_reports: "142",
+        dbr_notretrieved_reports: "12",
+        dbr_assessed: "130",
+        dbr_excluded: "Wrong population, 70; Wrong design, 20; No outcome data, 10",
+        other_sought_reports: "24",
+        other_notretrieved_reports: "3",
+        other_assessed: "21",
+        other_excluded: "Wrong population, 12; Duplicate report, 3",
+        new_studies: "26",
+        new_reports: "31",
+        total_studies: "26",
+        total_reports: "31",
+        total_studies_ma: "20",
+        total_reports_ma: "24"
+      };
+      beginHistory();
+      for (const [id, value] of Object.entries(demoValues)) {
+        const row = rowById(id);
+        if (row) row.n = value;
+      }
+      queueHistoryCommit();
+      renderEditor();
+      renderLabelEditor();
+      renderBulkTable();
+      renderVisibilityPanel();
+      renderDiagram();
+      showEditorSection("identification");
+      setStatus("Synthetic demo data loaded. Replace it before publication.");
+    }
+
     function focusRow(index) {
       const row = rows[index];
       if (!row) return;
@@ -625,6 +670,9 @@ const POSITIONS = {
     function selectedRow(index) {
       const row = rows[index];
       if (!row) return;
+      diagram.querySelectorAll("[data-row-index]").forEach((node) => {
+        node.classList.toggle("is-selected", Number(node.dataset.rowIndex) === index);
+      });
       selectedInfo.innerHTML = `<strong>${escapeHtml(row.data === "NA" ? row.box : row.data)}</strong> | ${escapeHtml(row.description || row.boxtext)}${row.n !== "" ? ` | <strong>${escapeHtml(displayValue(row))}</strong>` : ""}`;
     }
 
