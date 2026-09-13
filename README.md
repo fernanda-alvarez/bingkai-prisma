@@ -21,7 +21,7 @@ the figure in the manuscript is traceable to one data version. Use the offline w
 
 ## Protocol / registration
 
-Set per review in the Project Manager (`PROSPERO ID`, `Review ID`, `Notes`). For a new review, create a project, fill `Review title` / `PROSPERO ID`, and keep the flow-diagram numbers consistent with that review’s protocol and search strategies. Past example: `00_Protocols and Plans/PFO_PROSPERO_Protocol_v2.0.docx` (HOPECARDIS, archived).
+Set per review in the Project Manager (`PROSPERO ID`, `Review ID`, `Notes`). For a new review, create a project, fill `Review title` / `PROSPERO ID`, and keep the flow-diagram numbers consistent with that review’s protocol and search strategies. Keep protocols, screening logs, participant-level data, and other unpublished research material in a private workspace; do not commit them to this public repository.
 
 ## Pipeline
 
