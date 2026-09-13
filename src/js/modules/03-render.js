@@ -563,6 +563,10 @@ const POSITIONS = {
       const prevStudies = value("previous_studies");
       const newStudies = value("new_studies");
       if (prevStudies !== null && newStudies !== null) fill("total_studies", prevStudies + newStudies);
+      if (changed.length) {
+        beginHistory();
+        queueHistoryCommit();
+      }
       renderEditor();
       renderLabelEditor();
       renderBulkTable();
@@ -589,7 +593,30 @@ const POSITIONS = {
       target.classList.add("field-flash");
     }
 
+    const STEP_PROGRESS_FIELDS = Object.freeze({
+      identification: ["previous_studies", "previous_reports", "database_results", "database_specific_results", "register_results", "register_specific_results", "website_results", "organisation_results", "citations_results"],
+      screening: ["duplicates", "excluded_automatic", "excluded_other", "records_screened", "records_excluded"],
+      eligibility: ["dbr_sought_reports", "dbr_notretrieved_reports", "dbr_assessed", "dbr_excluded", "other_sought_reports", "other_notretrieved_reports", "other_assessed", "other_excluded"],
+      included: ["new_studies", "new_reports", "total_studies", "total_reports", "total_studies_ma", "total_reports_ma"]
+    });
+
+    function updateStepProgress() {
+      for (const [section, fieldIds] of Object.entries(STEP_PROGRESS_FIELDS)) {
+        const badge = sectionNav?.querySelector("[data-step-progress=\"" + section + "\"]");
+        const button = badge?.closest("[data-section]");
+        if (!badge || !button) continue;
+        const complete = fieldIds.filter((id) => {
+          const value = String(rowById(id)?.n ?? "").trim();
+          return value !== "" && value !== "0" && value !== "NA" && !/xxx/i.test(value);
+        }).length;
+        badge.textContent = complete + "/" + fieldIds.length;
+        badge.title = complete + " of " + fieldIds.length + " fields populated";
+        button.classList.toggle("step-complete", complete === fieldIds.length);
+      }
+    }
+
     function updateStats() {
+      updateStepProgress();
       const valueCount = rows.filter((row) => row.n !== "" && row.n !== "0").length;
       const visibleArms = [settings.showPrevious ? "previous" : "", settings.showDatabases ? "databases" : "", settings.showOther ? "other methods" : ""].filter(Boolean).join(" + ");
       stats.textContent = `${rows.length + 1} CSV rows loaded | ${valueCount} populated fields | ${visibleArms || "main arm only"}`;
@@ -605,7 +632,9 @@ const POSITIONS = {
       const index = Number(target.dataset.rowIndex);
       const column = target.dataset.column;
       if (!Number.isInteger(index) || !rows[index] || !column) return;
+      beginHistory();
       rows[index][column] = target.value;
+      queueHistoryCommit();
       const fieldStatus = target.closest(".field")?.querySelector(".field-status");
       if (fieldStatus && column === "n" && target.type === "number") {
         const invalid = target.value.trim() !== "" && numeric(target.value) === null;
