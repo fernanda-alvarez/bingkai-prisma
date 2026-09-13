@@ -129,7 +129,7 @@ total_reports_ma,NA,box17,Reports of total included studies in meta-analysis,Rep
       boxHidden: {},
       rowHidden: {}
     };
-    const DEFAULT_PROJECT_META = { reviewTitle: "HOPECARDIS — PFO closure devices", prosperoId: "", reviewId: "", notes: "" };
+    const DEFAULT_PROJECT_META = { reviewTitle: "New systematic review", prosperoId: "", reviewId: "", notes: "" };
 
     let diagramZoom = 1;
 
@@ -180,7 +180,7 @@ total_reports_ma,NA,box17,Reports of total included studies in meta-analysis,Rep
       // discard legacy: do not migrate STORAGE_KEY, just start clean
       try { window.localStorage.removeItem(STORAGE_KEY); } catch (_) {}
       try { window.localStorage.removeItem(CHECKPOINT_KEY_LEGACY); } catch (_) {}
-      const first = makeDefaultProject("HOPECARDIS — clean template");
+      const first = makeDefaultProject("New review — clean template");
       data = { version: 1, projects: [first] };
       saveProjectsRaw(data);
       try { window.localStorage.setItem(CURRENT_PID_KEY, first.id); } catch (_) {}
