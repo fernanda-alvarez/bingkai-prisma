@@ -321,6 +321,7 @@ let EXPECTED_DATA_KEYS = null;
       setStatus(`Deleted. Switched to “${next.name}”.`);
     }
     function exportCurrentProjectBundle() {
+      if (typeof privacyGuard === "function" && !privacyGuard("project bundle")) return;
       const cur = getCurrentProject();
       if (!cur) return;
       // ensure latest edits are captured
