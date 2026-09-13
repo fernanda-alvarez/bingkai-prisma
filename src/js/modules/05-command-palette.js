@@ -69,6 +69,9 @@
     } catch(_){}
 
     // actions
+    cmds.push({ id:"undo-edit", label:"Undo last edit", hint:"Ctrl/Cmd + Z", action:()=> undoEdit(), keys:"u" });
+    cmds.push({ id:"redo-edit", label:"Redo last edit", hint:"Ctrl/Cmd + Shift + Z", action:()=> redoEdit(), keys:"r" });
+    cmds.push({ id:"privacy-check", label:"Run privacy check", hint:"Scan current project", action:()=> document.getElementById("privacyCheckButton")?.click() });
     cmds.push({ id:"export-csv", label:"Export CSV", hint:"PRISMA_2020_edited.csv", action:()=> document.getElementById("downloadCsv")?.click(), keys:"e c" });
     cmds.push({ id:"export-svg", label:"Download SVG", hint:"Vector diagram", action:()=> document.getElementById("downloadSvg")?.click(), keys:"e s" });
     cmds.push({ id:"export-png", label:"Download PNG", hint:"3× large text", action:()=> document.getElementById("downloadPng")?.click(), keys:"e p" });
