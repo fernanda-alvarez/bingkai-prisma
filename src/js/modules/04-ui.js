@@ -176,6 +176,9 @@ editorFields.addEventListener("input", (event) => {
       if (button) showEditorSection(button.dataset.section);
     });
 
+    document.getElementById("startReviewButton")?.addEventListener("click", () => showEditorSection("identification"));
+    document.getElementById("startImportButton")?.addEventListener("click", () => document.getElementById("csvInput")?.click());
+
     checkList.addEventListener("click", (event) => {
       const target = event.target.closest?.("[data-focus-id]");
       if (!target) return;
