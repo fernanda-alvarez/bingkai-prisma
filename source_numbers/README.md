@@ -7,13 +7,13 @@ for its `n` value.
 
 | `data` id (box) | Value comes from | Project location |
 |---|---|---|
-| `database_results`, `register_results` | Per-database hit counts from the executed searches | `00_Protocols and Plans/PFO_PROSPERO_Search_Strategies - v2.docx` |
+| `database_results`, `register_results` | Per-database hit counts from the executed searches | the private protocol/search workspace |
 | `duplicates` | Rayyan duplicate-removal count | `02_Screening/` (Rayyan exports) |
-| `records_screened`, `records_excluded` | Title/abstract screening decisions | `02_Screening/Rayyan PFO Selection Maybe 45.csv`, `02_Screening/inclusion_audit_2026-07-10.md` |
-| `dbr_sought_reports`, `dbr_notretrieved_reports` | Full-text retrieval log (available vs not) | `02_Screening/pending_full_text_eligibility_2026-07-29.md` |
-| `dbr_assessed`, `dbr_excluded` | Full-text eligibility decisions | `03_Data Extraction (DeepSeek)/` + this folder's `ExcludedStudies.tsv` |
-| `new_studies`, `total_studies` | Final included-studies list | `05_R Meta-analysis/data_derived/*_analysis_ready.csv` (reconcile with `tools/reconcile_meta.py`) |
-| `total_studies_ma` | Studies actually pooled | `05_R Meta-analysis/data_derived/` (must match `reconcile_meta.py`) |
+| `records_screened`, `records_excluded` | Title/abstract screening decisions | the private screening workspace |
+| `dbr_sought_reports`, `dbr_notretrieved_reports` | Full-text retrieval log (available vs not) | the private screening workspace |
+| `dbr_assessed`, `dbr_excluded` | Full-text eligibility decisions | the private extraction workspace plus this folder's `ExcludedStudies.tsv` |
+| `new_studies`, `total_studies` | Final included-studies list | the private analysis workspace (reconcile with `tools/reconcile_meta.py`) |
+| `total_studies_ma` | Studies actually pooled | the private analysis workspace (must match `reconcile_meta.py`) |
 | `previous_studies`, `previous_reports` | 0 for a *de novo* review | — (leave `0`, never blank) |
 | `website_results`, `organisation_results`, `citations_results` | Citation searching / hand-searching log | `02_Screening/`, PRISMA guidance (leave `0` if not done) |
 
