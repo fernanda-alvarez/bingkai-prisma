@@ -195,7 +195,7 @@ function ensureProjects(){
   let data=loadProjectsRaw();
   if(data && data.projects.length) return data;
   // seed one clean project if none
-  const first={ id:uid("proj"), name:"HOPECARDIS — clean template", createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), meta:{ reviewTitle:"HOPECARDIS — PFO closure devices", prosperoId:"", reviewId:"", notes:"" }, rows:[], settings:{}, checkpoints:[] };
+  const first={ id:uid("proj"), name:"New review — clean template", createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), meta:{ reviewTitle:"New systematic review", prosperoId:"", reviewId:"", notes:"" }, rows:[], settings:{}, checkpoints:[] };
   // try to keep empty but signal that workbench will hydrate with DEFAULT_ROWS
   data={ version:1, projects:[first] };
   saveProjectsRaw(data);
