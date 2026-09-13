@@ -1658,24 +1658,6 @@ let EXPECTED_DATA_KEYS = null;
     }
     // heal all on load
     (function(){ let h=false; getProjects().forEach(p=>{ if(healProject(p)) h=true; }); if(h) saveProjectsRaw(_projectsData); })();
-    // one-time: remove HOPECARDIS project(s) — user confirmed 2026-08-27 that HOPECARDIS is done
-    (function(){
-      try{
-        const has = getProjects().some(p => /HOPECARDIS/i.test(p.name) || /HOPECARDIS/i.test(p.meta?.reviewTitle||""));
-        if(!has) return;
-        const before=getProjects().length;
-        _projectsData.projects = getProjects().filter(p => !/HOPECARDIS/i.test(p.name) && !/HOPECARDIS/i.test(p.meta?.reviewTitle||""));
-        if(_projectsData.projects.length===0){
-          const fresh=makeDefaultProject("New review — clean template");
-          _projectsData.projects=[fresh];
-          try{ window.localStorage.setItem(CURRENT_PID_KEY, fresh.id);}catch(_){}
-        } else if(!getProjects().some(p=>p.id===getCurrentProjectId())){
-          try{ window.localStorage.setItem(CURRENT_PID_KEY, getProjects()[0].id);}catch(_){}
-        }
-        saveProjectsRaw(_projectsData);
-        console.log(`Removed HOPECARDIS project(s): ${before} -> ${getProjects().length}`);
-      }catch(_){}
-    })();
     // honor ?project= query param for cross-file dashboard → workbench handoff (file:// isolation workaround)
     (function(){
       try {
